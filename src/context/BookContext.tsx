@@ -4,6 +4,7 @@ import type { Book } from '../types';
 interface BookContextType {
   books: Book[];
   setBooks: React.Dispatch<React.SetStateAction<Book[]>>;
+  addBook: (book: Book) => void;
 }
 
 const BookContext = createContext<BookContextType | undefined>(undefined);
@@ -24,8 +25,12 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('books', JSON.stringify(books));
   }, [books]);
 
+  const addBook = (book: Book) => {
+    setBooks((prevBooks) => [...prevBooks, book]);
+  };
+
   return (
-    <BookContext.Provider value={{ books, setBooks }}>
+    <BookContext.Provider value={{ books, setBooks, addBook }}>
       {children}
     </BookContext.Provider>
   );

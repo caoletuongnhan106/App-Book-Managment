@@ -1,5 +1,6 @@
 import { useBookContext } from './context/BookContext';
 import { BookProvider } from './context/BookContext';
+import AddBookForm from './components/AddBookForm';
 
 function AppContent() {
   const { books } = useBookContext();
@@ -7,6 +8,7 @@ function AppContent() {
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">Library Management System</h1>
+      <AddBookForm />
       <div className="row">
         {books.length === 0 ? (
           <p className="text-center">No books available.</p>
