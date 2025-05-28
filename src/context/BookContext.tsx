@@ -13,6 +13,7 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [books, setBooks] = useState<Book[]>([]);
 
   useEffect(() => {
+    // Initialize sample data in localStorage
     const initialBooks: Book[] = [
       { id: '1', title: 'Book One', author: 'Author A', year: 2020, quantity: 5 },
       { id: '2', title: 'Book Two', author: 'Author B', year: 2021, quantity: 3 },
@@ -22,6 +23,7 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
+    // Sync books with localStorage whenever books change
     localStorage.setItem('books', JSON.stringify(books));
   }, [books]);
 

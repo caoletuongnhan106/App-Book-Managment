@@ -1,6 +1,7 @@
 import { useReducer, useCallback } from 'react';
 import { useBookContext } from '../context/BookContext';
 import { v4 as uuidv4 } from 'uuid';
+import { TextField, Button, Box } from '@mui/material';
 
 interface FormState {
   title: string;
@@ -70,50 +71,55 @@ const AddBookForm: React.FC = () => {
   );
 
   return (
-    <form onSubmit={handleSubmit} className="mb-5">
-      <div className="row g-3">
-        <div className="col-md-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Title"
+    <form onSubmit={handleSubmit}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 2,
+          mb: 3,
+        }}
+      >
+        <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(25% - 16px)' } }}>
+          <TextField
+            fullWidth
+            label="Title"
             value={state.title}
             onChange={(e) => dispatch({ type: 'SET_TITLE', payload: e.target.value })}
           />
-        </div>
-        <div className="col-md-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Author"
+        </Box>
+        <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(25% - 16px)' } }}>
+          <TextField
+            fullWidth
+            label="Author"
             value={state.author}
             onChange={(e) => dispatch({ type: 'SET_AUTHOR', payload: e.target.value })}
           />
-        </div>
-        <div className="col-md-2">
-          <input
+        </Box>
+        <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(16.66% - 16px)' } }}>
+          <TextField
+            fullWidth
             type="number"
-            className="form-control"
-            placeholder="Year"
+            label="Year"
             value={state.year}
             onChange={(e) => dispatch({ type: 'SET_YEAR', payload: e.target.value })}
           />
-        </div>
-        <div className="col-md-2">
-          <input
+        </Box>
+        <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(16.66% - 16px)' } }}>
+          <TextField
+            fullWidth
             type="number"
-            className="form-control"
-            placeholder="Quantity"
+            label="Quantity"
             value={state.quantity}
             onChange={(e) => dispatch({ type: 'SET_QUANTITY', payload: e.target.value })}
           />
-        </div>
-        <div className="col-md-2">
-          <button type="submit" className="btn btn-primary w-100">
+        </Box>
+        <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(16.66% - 16px)' } }}>
+          <Button type="submit" variant="contained" fullWidth>
             Add Book
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Box>
+      </Box>
     </form>
   );
 };

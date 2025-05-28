@@ -4,4 +4,4 @@ export interface Book {
     author: string;
     year: number;
     quantity: number;
-  }
+  }  
