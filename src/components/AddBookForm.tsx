@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Grid } from '@mui/material';
 import { useBookContext } from '../context/BookContext';
 import CustomForm from './CustomForm';
 import CustomTextField from './inputs/CustomTextField';
@@ -28,43 +28,35 @@ const bookConditions = [
 
 const FormFields: React.FC = () => {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 2,
-        mb: 3,
-        backgroundColor: 'background.default',
-        p: 2,
-        borderRadius: 1,
-      }}
-    >
-      <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(25% - 16px)' } }}>
-        <CustomTextField name="title" label="Title" />
-      </Box>
-      <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(25% - 16px)' } }}>
-        <CustomTextField name="author" label="Author" />
-      </Box>
-      <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(16.66% - 16px)' } }}>
-        <CustomTextField name="year" label="Year" type="number" />
-      </Box>
-      <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(16.66% - 16px)' } }}>
-        <CustomTextField name="quantity" label="Quantity" type="number" />
-      </Box>
-      <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(25% - 16px)' } }}>
-        <CustomAutocomplete name="category" label="Category" options={categories} />
-      </Box>
-      <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(25% - 16px)' } }}>
-        <CustomCheckbox name="isAvailable" label="Available" />
-      </Box>
-      <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(25% - 16px)' } }}>
-        <CustomRadioGroup name="bookCondition" options={bookConditions} label={''} />
-      </Box>
-      <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(16.66% - 16px)' } }}>
-        <Button type="submit" variant="contained" color="primary" fullWidth>
-          Add Book
-        </Button>
-      </Box>
+    <Box sx={{ mb: 3, backgroundColor: 'background.default', p: 2, borderRadius: 1 }}>
+      <Grid container spacing={2}>
+        <Grid size={{ xs:12, sm:6, md:3}}>
+          <CustomTextField name="title" label="Title" />
+        </Grid>
+        <Grid size= {{ xs:12, sm:6, md:3}}>
+          <CustomTextField name="author" label="Author" />
+        </Grid>
+        <Grid size = {{xs:12, sm: 6, md:2 }}>
+          <CustomTextField name="year" label="Year" type="number" />
+        </Grid>
+        <Grid size = {{xs: 12, sm:6, md: 2 }}>
+          <CustomTextField name="quantity" label="Quantity" type="number" />
+        </Grid>
+        <Grid size= {{ xs:12, sm:6, md:3}}>
+          <CustomAutocomplete name="category" label="Category" options={categories} />
+        </Grid>
+        <Grid size= {{ xs:12, sm:6, md:3}}>
+          <CustomCheckbox name="isAvailable" label="Available" />
+        </Grid>
+        <Grid size= {{ xs:12, sm:6, md:3}}>
+          <CustomRadioGroup name="bookCondition" options={bookConditions} label={''} />
+        </Grid>
+        <Grid size= {{ xs:12, sm:6, md:2}}>
+          <Button type="submit" variant="contained" color="primary" fullWidth>
+            Add Book
+          </Button>
+        </Grid>
+      </Grid>
     </Box>
   );
 };
@@ -75,7 +67,7 @@ const AddBookForm: React.FC = () => {
   const mutation = useMutation({
     mutationFn: (data: any) => addBookApi(data),
     onSuccess: (data) => {
-      addBook(data); 
+      addBook(data);
     },
   });
 
