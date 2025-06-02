@@ -1,38 +1,53 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useReducer, type ReactNode } from 'react';
 import type { Book } from '../types';
 
-interface BookContextType {
+interface BookState {
   books: Book[];
-  setBooks: React.Dispatch<React.SetStateAction<Book[]>>;
-  addBook: (book: Book) => void;
 }
 
-const BookContext = createContext<BookContextType | undefined>(undefined);
+const initialState: BookState = {
+  books: [],
+};
 
-export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [books, setBooks] = useState<Book[]>([]);
+type BookAction =
+  | { type: 'ADD_BOOK'; payload: Book }
+  | { type: 'EDIT_BOOK'; payload: { id: string; updatedBook: Book } };
 
-  useEffect(() => {
-    // Initialize sample data in localStorage
-    const initialBooks: Book[] = [
-      { id: '1', title: 'Book One', author: 'Author A', year: 2020, quantity: 5 },
-      { id: '2', title: 'Book Two', author: 'Author B', year: 2021, quantity: 3 },
-    ];
-    localStorage.setItem('books', JSON.stringify(initialBooks));
-    setBooks(initialBooks);
-  }, []);
+const bookReducer = (state: BookState, action: BookAction): BookState => {
+  switch (action.type) {
+    case 'ADD_BOOK':
+      return { ...state, books: [...state.books, action.payload] };
+    case 'EDIT_BOOK':
+      return {
+        ...state,
+        books: state.books.map((book) =>
+          book.id === action.payload.id ? action.payload.updatedBook : book
+        ),
+      };
+    default:
+      return state;
+  }
+};
 
-  useEffect(() => {
-    // Sync books with localStorage whenever books change
-    localStorage.setItem('books', JSON.stringify(books));
-  }, [books]);
+const BookContext = createContext<{
+  state: BookState;
+  addBook: (book: Book) => void;
+  editBook: (id: string, updatedBook: Book) => void;
+} | undefined>(undefined);
+
+export const BookProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [state, dispatch] = useReducer(bookReducer, initialState);
 
   const addBook = (book: Book) => {
-    setBooks((prevBooks) => [...prevBooks, book]);
+    dispatch({ type: 'ADD_BOOK', payload: book });
+  };
+
+  const editBook = (id: string, updatedBook: Book) => {
+    dispatch({ type: 'EDIT_BOOK', payload: { id, updatedBook } });
   };
 
   return (
-    <BookContext.Provider value={{ books, setBooks, addBook }}>
+    <BookContext.Provider value={{ state, addBook, editBook }}>
       {children}
     </BookContext.Provider>
   );
