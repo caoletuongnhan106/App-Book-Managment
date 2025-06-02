@@ -1,8 +1,13 @@
-import { useFormContext, Controller } from 'react-hook-form';
 import { v4 as uuidv4 } from 'uuid';
-import { TextField, Button, Box, RadioGroup, Radio, FormControlLabel, Checkbox, Autocomplete, Typography } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { useBookContext } from '../context/BookContext';
 import CustomForm from './CustomForm';
+import CustomTextField from './inputs/CustomTextField';
+import CustomAutocomplete from './inputs/CustomAutocomplete';
+import CustomCheckbox from './inputs/CustomCheckbox';
+import CustomRadioGroup from './inputs/CustomRadioGroup';
+import { useMutation } from '@tanstack/react-query';
+import { addBookApi } from '../api/mockApi';
 import * as yup from 'yup';
 
 const schema = yup.object({
@@ -16,10 +21,12 @@ const schema = yup.object({
 }).required();
 
 const categories = ['Fiction', 'Non-Fiction', 'Science', 'History'];
+const bookConditions = [
+  { value: 'new', label: 'New' },
+  { value: 'used', label: 'Used' },
+];
 
 const FormFields: React.FC = () => {
-  const { control, formState: { errors } } = useFormContext();
-
   return (
     <Box
       sx={{
@@ -33,120 +40,25 @@ const FormFields: React.FC = () => {
       }}
     >
       <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(25% - 16px)' } }}>
-        <Controller
-          name="title"
-          control={control}
-          defaultValue=""
-          render={({ field }) => (
-            <TextField
-              fullWidth
-              label="Title"
-              {...field}
-              error={!!errors.title}
-              helperText={errors.title?.message as string}
-              variant="outlined"
-            />
-          )}
-        />
+        <CustomTextField name="title" label="Title" />
       </Box>
       <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(25% - 16px)' } }}>
-        <Controller
-          name="author"
-          control={control}
-          defaultValue=""
-          render={({ field }) => (
-            <TextField
-              fullWidth
-              label="Author"
-              {...field}
-              error={!!errors.author}
-              helperText={errors.author?.message as string}
-              variant="outlined"
-            />
-          )}
-        />
+        <CustomTextField name="author" label="Author" />
       </Box>
       <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(16.66% - 16px)' } }}>
-        <Controller
-          name="year"
-          control={control}
-          defaultValue=""
-          render={({ field }) => (
-            <TextField
-              fullWidth
-              type="number"
-              label="Year"
-              {...field}
-              error={!!errors.year}
-              helperText={errors.year?.message as string}
-              variant="outlined"
-            />
-          )}
-        />
+        <CustomTextField name="year" label="Year" type="number" />
       </Box>
       <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(16.66% - 16px)' } }}>
-        <Controller
-          name="quantity"
-          control={control}
-          defaultValue=""
-          render={({ field }) => (
-            <TextField
-              fullWidth
-              type="number"
-              label="Quantity"
-              {...field}
-              error={!!errors.quantity}
-              helperText={errors.quantity?.message as string}
-              variant="outlined"
-            />
-          )}
-        />
+        <CustomTextField name="quantity" label="Quantity" type="number" />
       </Box>
       <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(25% - 16px)' } }}>
-        <Controller
-          name="category"
-          control={control}
-          defaultValue=""
-          render={({ field }) => (
-            <Autocomplete
-              options={categories}
-              getOptionLabel={(option) => option}
-              renderInput={(params) => <TextField {...params} label="Category" variant="outlined" />}
-              {...field}
-              onChange={(_, data) => field.onChange(data)}
-              value={field.value || null}
-            />
-          )}
-        />
-        {errors.category && <Typography color="error">{errors.category.message as string}</Typography>}
+        <CustomAutocomplete name="category" label="Category" options={categories} />
       </Box>
       <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(25% - 16px)' } }}>
-        <Controller
-          name="isAvailable"
-          control={control}
-          defaultValue={false}
-          render={({ field }) => (
-            <FormControlLabel
-              control={<Checkbox {...field} checked={field.value} />}
-              label="Available"
-            />
-          )}
-        />
-        {errors.isAvailable && <Typography color="error">{errors.isAvailable.message as string}</Typography>}
+        <CustomCheckbox name="isAvailable" label="Available" />
       </Box>
       <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(25% - 16px)' } }}>
-        <Controller
-          name="bookCondition"
-          control={control}
-          defaultValue="new"
-          render={({ field }) => (
-            <RadioGroup {...field}>
-              <FormControlLabel value="new" control={<Radio />} label="New" />
-              <FormControlLabel value="used" control={<Radio />} label="Used" />
-            </RadioGroup>
-          )}
-        />
-        {errors.bookCondition && <Typography color="error">{errors.bookCondition.message as string}</Typography>}
+        <CustomRadioGroup name="bookCondition" options={bookConditions} label={''} />
       </Box>
       <Box sx={{ flex: { xs: '100%', sm: '0 0 calc(16.66% - 16px)' } }}>
         <Button type="submit" variant="contained" color="primary" fullWidth>
@@ -160,8 +72,15 @@ const FormFields: React.FC = () => {
 const AddBookForm: React.FC = () => {
   const { addBook } = useBookContext();
 
+  const mutation = useMutation({
+    mutationFn: (data: any) => addBookApi(data),
+    onSuccess: (data) => {
+      addBook(data); 
+    },
+  });
+
   const onSubmit = (data: any, methods: any) => {
-    addBook({
+    mutation.mutate({
       id: uuidv4(),
       title: data.title,
       author: data.author,
