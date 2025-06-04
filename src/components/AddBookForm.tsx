@@ -88,7 +88,15 @@ const AddBookForm: React.FC = () => {
   return (
     <CustomForm
       onSubmit={onSubmit}
-      defaultValues={{ title: '', author: '', year: '', quantity: '', category: '', isAvailable: false, bookCondition: 'new' }}
+      defaultValues={{
+        title: '',
+        author: '',
+        year: '',
+        quantity: '',
+        category: '',
+        isAvailable: false,
+        bookCondition: 'new',
+      }}
       validationSchema={schema}
     >
       <FormFields />

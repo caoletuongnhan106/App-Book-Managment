@@ -1,4 +1,4 @@
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import { Autocomplete, TextField } from '@mui/material';
 
 interface CustomAutocompleteProps {
@@ -10,14 +10,10 @@ interface CustomAutocompleteProps {
 }
 
 const CustomAutocomplete: React.FC<CustomAutocompleteProps> = ({ name, label, options, onChange: propOnChange, onBlur: propOnBlur }) => {
-  const { control, formState: { errors } } = useFormContext();
-
   return (
     <Controller
       name={name}
-      control={control}
-      defaultValue=""
-      render={({ field }) => (
+      render={({ field, fieldState }) => (
         <Autocomplete
           options={options}
           getOptionLabel={(option) => option}
@@ -26,8 +22,8 @@ const CustomAutocomplete: React.FC<CustomAutocompleteProps> = ({ name, label, op
               {...params}
               label={label}
               variant="outlined"
-              error={!!errors[name]}
-              helperText={errors[name] ? (errors[name]?.message as string) : ''}
+              error={!!fieldState.error}
+              helperText={fieldState.error?.message || ''}
             />
           )}
           {...field}

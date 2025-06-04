@@ -1,4 +1,4 @@
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import { RadioGroup, Radio, FormControlLabel, FormHelperText } from '@mui/material';
 
 interface CustomRadioGroupProps {
@@ -10,38 +10,36 @@ interface CustomRadioGroupProps {
 }
 
 const CustomRadioGroup: React.FC<CustomRadioGroupProps> = ({ name, options, onChange: propOnChange, onBlur: propOnBlur }) => {
-  const { control, formState: { errors } } = useFormContext();
-
   return (
     <>
       <Controller
         name={name}
-        control={control}
-        defaultValue="new"
-        render={({ field }) => (
-          <RadioGroup
-            {...field}
-            onChange={(e) => {
-              field.onChange(e.target.value);
-              if (propOnChange) propOnChange(e.target.value);
-            }}
-            onBlur={() => {
-              field.onBlur();
-              if (propOnBlur) propOnBlur();
-            }}
-          >
-            {options.map((option) => (
-              <FormControlLabel
-                key={option.value}
-                value={option.value}
-                control={<Radio />}
-                label={option.label}
-              />
-            ))}
-          </RadioGroup>
+        render={({ field, fieldState }) => (
+          <>
+            <RadioGroup
+              {...field}
+              onChange={(e) => {
+                field.onChange(e.target.value);
+                if (propOnChange) propOnChange(e.target.value);
+              }}
+              onBlur={() => {
+                field.onBlur();
+                if (propOnBlur) propOnBlur();
+              }}
+            >
+              {options.map((option) => (
+                <FormControlLabel
+                  key={option.value}
+                  value={option.value}
+                  control={<Radio />}
+                  label={option.label}
+                />
+              ))}
+            </RadioGroup>
+            {fieldState.error && <FormHelperText error>{fieldState.error?.message}</FormHelperText>}
+          </>
         )}
       />
-      {errors[name] && <FormHelperText error>{errors[name]?.message as string}</FormHelperText>}
     </>
   );
 };
