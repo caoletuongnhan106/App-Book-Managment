@@ -7,4 +7,5 @@ export interface Book {
   category: string;
   isAvailable: boolean;
   bookCondition: 'new' | 'used';
+  imageUrl?: string;
 }
