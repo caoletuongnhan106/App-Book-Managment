@@ -7,7 +7,7 @@ import { Container, Box, Typography } from '@mui/material';
 
 function AppContent() {
   const { state } = useBookContext();
-  const books = state.books; 
+  const books = state.books;
 
   const bookList = useMemo(() => {
     return books ? books.map((book) => <CardComponent key={book.id} book={book} />) : [];

@@ -1,32 +1,63 @@
+import { useState } from 'react';
+import { Card, CardContent, CardMedia, Typography, CardActions, Button } from '@mui/material';
+import EditBookDialog from './EditBookDialog';
 import type { Book } from '../types';
-import { Box, Card, CardContent, Typography } from '@mui/material';
+import noImage from '../assets/no-image.jpg';
 
 interface CardProps {
   book: Book;
 }
 
 const CardComponent: React.FC<CardProps> = ({ book }) => {
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+
+  const handleOpenEditDialog = () => {
+    setOpenEditDialog(true);
+  };
+
+  const handleCloseEditDialog = () => {
+    setOpenEditDialog(false);
+  };
+
   return (
-    <Box
-      sx={{
-        width: { xs: '100%', sm: '50%', md: '33.33%' },
-        p: 1,
-        '&:hover': {
-          boxShadow: 3,
-        },
-      }}
-    >
-      <Card sx={{ minHeight: '150px', backgroundColor: 'background.default' }}>
+    <>
+      <Card sx={{ width: 300, m: 1 }}>
+        <CardMedia
+          sx={{ height: 140 }}
+          image={book.imageUrl || noImage}
+          title={book.title}
+        />
         <CardContent>
-          <Typography variant="h6" color="primary">
+          <Typography gutterBottom variant="h5" component="div">
             {book.title}
           </Typography>
-          <Typography color="text.secondary">Author: {book.author}</Typography>
-          <Typography color="text.secondary">Year: {book.year}</Typography>
-          <Typography color="text.secondary">Quantity: {book.quantity}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            Author: {book.author}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Year: {book.year}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Quantity: {book.quantity}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Category: {book.category}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Available: {book.isAvailable ? 'Yes' : 'No'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Condition: {book.bookCondition}
+          </Typography>
         </CardContent>
+        <CardActions>
+          <Button size="small" onClick={handleOpenEditDialog}>
+            Edit
+          </Button>
+        </CardActions>
       </Card>
-    </Box>
+      <EditBookDialog book={book} open={openEditDialog} onClose={handleCloseEditDialog} />
+    </>
   );
 };
 

@@ -1,15 +1,21 @@
-import { v4 as uuidv4 } from 'uuid';
-import { Box, Button, Grid } from '@mui/material';
-import { useBookContext } from '../context/BookContext';
+import { useState } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, Box } from '@mui/material';
 import CustomForm from './CustomForm';
 import CustomTextField from './inputs/CustomTextField';
 import CustomAutocomplete from './inputs/CustomAutocomplete';
 import CustomCheckbox from './inputs/CustomCheckbox';
 import CustomRadioGroup from './inputs/CustomRadioGroup';
-import UploadFile from './inputs/UploadFile';
 import { useMutation } from '@tanstack/react-query';
-import { addBookApi } from '../api/mockApi';
+import type { Book } from '../types';
+import { useBookContext } from '../context/BookContext';
+import { editBookApi } from '../api/mockApi';
 import * as yup from 'yup';
+
+interface EditBookDialogProps {
+  book: Book;
+  open: boolean;
+  onClose: () => void;
+}
 
 const schema = yup.object({
   title: yup.string().required('Title is required'),
@@ -19,7 +25,6 @@ const schema = yup.object({
   category: yup.string().required('Category is required'),
   isAvailable: yup.boolean().required('Availability is required'),
   bookCondition: yup.string().required('Book condition is required').oneOf(['new', 'used'], 'Select a valid condition'),
-  image: yup.mixed().nullable(),
 }).required();
 
 const categories = ['Fiction', 'Non-Fiction', 'Science', 'History'];
@@ -28,60 +33,55 @@ const bookConditions = [
   { value: 'used', label: 'Used' },
 ];
 
-const FormFields: React.FC = () => {
+const EditBookFormFields: React.FC = () => {
   return (
-    <Box sx={{ mb: 3, backgroundColor: 'background.default', p: 2, borderRadius: 1 }}>
+    <Box sx={{ p: 2 }}>
       <Grid container spacing={2}>
-        <Grid size={{ xs:12, sm:6, md:3}}>
+        <Grid size = {{xs: 12, sm: 6, md: 3}} >
           <CustomTextField name="title" label="Title" />
         </Grid>
-        <Grid size= {{ xs:12, sm:6, md:3}}>
+        <Grid size = {{xs: 12, sm: 6, md: 3}}>
           <CustomTextField name="author" label="Author" />
         </Grid>
-        <Grid size = {{xs:12, sm: 6, md:2 }}>
+        <Grid size = {{xs: 12, sm: 6, md: 2}}>
           <CustomTextField name="year" label="Year" type="number" />
         </Grid>
-        <Grid size = {{xs: 12, sm:6, md: 2 }}>
+        <Grid size = {{xs: 12, sm: 6, md: 2}}>
           <CustomTextField name="quantity" label="Quantity" type="number" />
         </Grid>
-        <Grid size= {{ xs:12, sm:6, md:3}}>
+        <Grid size = {{xs: 12, sm: 6, md: 3}}>
           <CustomAutocomplete name="category" label="Category" options={categories} />
         </Grid>
-        <Grid size= {{ xs:12, sm:6, md:3}}>
+        <Grid size = {{xs: 12, sm: 6, md: 3}}>
           <CustomCheckbox name="isAvailable" label="Available" />
         </Grid>
-        <Grid size= {{ xs:12, sm:6, md:3}}>
+        <Grid size = {{xs: 12, sm: 6, md: 3}}>
           <CustomRadioGroup name="bookCondition" options={bookConditions} label={''} />
         </Grid>
-        <Grid size= {{ xs:12, sm:6, md:3}}>
-          <UploadFile name="image" accept="image/*" />
-        </Grid>
-        <Grid size= {{ xs:12, sm:6, md:2}}>
-          <Button type="submit" variant="contained" color="primary" fullWidth>
-            Add Book
-          </Button>
+        <Grid size = {{xs: 12, sm: 6, md: 3}}>
+          <input type="file" accept="image/*" name="image" />
         </Grid>
       </Grid>
     </Box>
   );
 };
 
-const AddBookForm: React.FC = () => {
-  const { addBook } = useBookContext();
+const EditBookDialog: React.FC<EditBookDialogProps> = ({ book, open, onClose }) => {
+  const { editBook } = useBookContext();
 
   const mutation = useMutation({
-    mutationFn: (data: any) => addBookApi(data),
+    mutationFn: (data: Book) => editBookApi(data),
     onSuccess: (data) => {
-      addBook(data);
+      editBook(book.id, data);
+      onClose();
     },
   });
 
   const onSubmit = (data: any, methods: any) => {
-    const imageFile = data.image as File | null;
-    const imageUrl = imageFile ? URL.createObjectURL(imageFile) : undefined;
-
+    const imageFile = (document.querySelector('input[name="image"]') as HTMLInputElement)?.files?.[0];
+    const imageUrl = imageFile ? URL.createObjectURL(imageFile) : book.imageUrl;
     mutation.mutate({
-      id: uuidv4(),
+      id: book.id,
       title: data.title,
       author: data.author,
       year: Number(data.year),
@@ -91,27 +91,36 @@ const AddBookForm: React.FC = () => {
       bookCondition: data.bookCondition,
       imageUrl,
     });
-    methods.reset();
   };
 
   return (
-    <CustomForm
-      onSubmit={onSubmit}
-      defaultValues={{
-        title: '',
-        author: '',
-        year: '',
-        quantity: '',
-        category: '',
-        isAvailable: false,
-        bookCondition: 'new',
-        image: null
-      }}
-      validationSchema={schema}
-    >
-      <FormFields />
-    </CustomForm>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle>Edit Book</DialogTitle>
+      <DialogContent>
+        <CustomForm
+          onSubmit={onSubmit}
+          defaultValues={{
+            title: book.title,
+            author: book.author,
+            year: book.year.toString(),
+            quantity: book.quantity.toString(),
+            category: book.category,
+            isAvailable: book.isAvailable,
+            bookCondition: book.bookCondition,
+          }}
+          validationSchema={schema}
+        >
+          <EditBookFormFields />
+          <DialogActions>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button type="submit" variant="contained" color="primary">
+              Save
+            </Button>
+          </DialogActions>
+        </CustomForm>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-export default AddBookForm;
+export default EditBookDialog;
