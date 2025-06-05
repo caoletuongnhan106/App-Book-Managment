@@ -3,6 +3,7 @@ import { Card, CardContent, CardMedia, Typography, CardActions, Button } from '@
 import EditBookDialog from './EditBookDialog';
 import type { Book } from '../types';
 import noImage from '../assets/no-image.jpg';
+import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 
 interface CardProps {
   book: Book;
@@ -10,6 +11,7 @@ interface CardProps {
 
 const CardComponent: React.FC<CardProps> = ({ book }) => {
   const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   const handleOpenEditDialog = () => {
     setOpenEditDialog(true);
@@ -17,6 +19,14 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
 
   const handleCloseEditDialog = () => {
     setOpenEditDialog(false);
+  };
+
+  const handleOpenDeleteDialog = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
   };
 
   return (
@@ -54,9 +64,18 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
           <Button size="small" onClick={handleOpenEditDialog}>
             Edit
           </Button>
+          <Button size="small" color="error" onClick={handleOpenDeleteDialog}>
+            Delete
+          </Button>
         </CardActions>
       </Card>
       <EditBookDialog book={book} open={openEditDialog} onClose={handleCloseEditDialog} />
+      <DeleteConfirmationDialog
+        bookId={book.id}
+        bookTitle={book.title}
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+      />
     </>
   );
 };

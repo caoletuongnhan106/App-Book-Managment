@@ -5,6 +5,7 @@ import CustomTextField from './inputs/CustomTextField';
 import CustomAutocomplete from './inputs/CustomAutocomplete';
 import CustomCheckbox from './inputs/CustomCheckbox';
 import CustomRadioGroup from './inputs/CustomRadioGroup';
+import UploadFile from './inputs/UploadFile';
 import { useMutation } from '@tanstack/react-query';
 import type { Book } from '../types';
 import { useBookContext } from '../context/BookContext';
@@ -25,6 +26,7 @@ const schema = yup.object({
   category: yup.string().required('Category is required'),
   isAvailable: yup.boolean().required('Availability is required'),
   bookCondition: yup.string().required('Book condition is required').oneOf(['new', 'used'], 'Select a valid condition'),
+  image: yup.mixed().nullable(),
 }).required();
 
 const categories = ['Fiction', 'Non-Fiction', 'Science', 'History'];
@@ -59,7 +61,7 @@ const EditBookFormFields: React.FC = () => {
           <CustomRadioGroup name="bookCondition" options={bookConditions} label={''} />
         </Grid>
         <Grid size = {{xs: 12, sm: 6, md: 3}}>
-          <input type="file" accept="image/*" name="image" />
+            <UploadFile name="image" accept="image/*" />
         </Grid>
       </Grid>
     </Box>
@@ -67,60 +69,62 @@ const EditBookFormFields: React.FC = () => {
 };
 
 const EditBookDialog: React.FC<EditBookDialogProps> = ({ book, open, onClose }) => {
-  const { editBook } = useBookContext();
-
-  const mutation = useMutation({
-    mutationFn: (data: Book) => editBookApi(data),
-    onSuccess: (data) => {
-      editBook(book.id, data);
-      onClose();
-    },
-  });
-
-  const onSubmit = (data: any, methods: any) => {
-    const imageFile = (document.querySelector('input[name="image"]') as HTMLInputElement)?.files?.[0];
-    const imageUrl = imageFile ? URL.createObjectURL(imageFile) : book.imageUrl;
-    mutation.mutate({
-      id: book.id,
-      title: data.title,
-      author: data.author,
-      year: Number(data.year),
-      quantity: Number(data.quantity),
-      category: data.category,
-      isAvailable: data.isAvailable,
-      bookCondition: data.bookCondition,
-      imageUrl,
+    const { editBook } = useBookContext();
+  
+    const mutation = useMutation({
+      mutationFn: (data: Book) => editBookApi(data),
+      onSuccess: (data) => {
+        editBook(book.id, data);
+        onClose();
+      },
     });
+  
+    const onSubmit = (data: any, methods: any) => {
+      const imageFile = data.image as File | null;
+      const imageUrl = imageFile ? URL.createObjectURL(imageFile) : book.imageUrl;
+  
+      mutation.mutate({
+        id: book.id,
+        title: data.title,
+        author: data.author,
+        year: Number(data.year),
+        quantity: Number(data.quantity),
+        category: data.category,
+        isAvailable: data.isAvailable,
+        bookCondition: data.bookCondition,
+        imageUrl,
+      });
+    };
+  
+    return (
+      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+        <DialogTitle>Edit Book</DialogTitle>
+        <DialogContent>
+          <CustomForm
+            onSubmit={onSubmit}
+            defaultValues={{
+              title: book.title,
+              author: book.author,
+              year: book.year.toString(),
+              quantity: book.quantity.toString(),
+              category: book.category,
+              isAvailable: book.isAvailable,
+              bookCondition: book.bookCondition,
+              image: null,
+            }}
+            validationSchema={schema}
+          >
+            <EditBookFormFields />
+            <DialogActions>
+              <Button onClick={onClose}>Cancel</Button>
+              <Button type="submit" variant="contained" color="primary">
+                Save
+              </Button>
+            </DialogActions>
+          </CustomForm>
+        </DialogContent>
+      </Dialog>
+    );
   };
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Edit Book</DialogTitle>
-      <DialogContent>
-        <CustomForm
-          onSubmit={onSubmit}
-          defaultValues={{
-            title: book.title,
-            author: book.author,
-            year: book.year.toString(),
-            quantity: book.quantity.toString(),
-            category: book.category,
-            isAvailable: book.isAvailable,
-            bookCondition: book.bookCondition,
-          }}
-          validationSchema={schema}
-        >
-          <EditBookFormFields />
-          <DialogActions>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button type="submit" variant="contained" color="primary">
-              Save
-            </Button>
-          </DialogActions>
-        </CustomForm>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-export default EditBookDialog;
+  
+  export default EditBookDialog;
