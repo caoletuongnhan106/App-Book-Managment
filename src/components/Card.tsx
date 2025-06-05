@@ -1,32 +1,34 @@
-import { useState } from 'react';
 import { Card, CardContent, CardMedia, Typography, CardActions, Button } from '@mui/material';
-import EditBookDialog from './EditBookDialog';
 import type { Book } from '../types';
 import noImage from '../assets/no-image.jpg';
-import DeleteConfirmationDialog from './DeleteConfirmationDialog';
+import useDialog from '../hooks/useDialog';
+import CustomDialog from './CustomDialog';
+import EditBookFormContent from './EditBookFormContent';
+import DeleteConfirmationContent from './DeleteConfirmationContent';
 
 interface CardProps {
   book: Book;
 }
 
 const CardComponent: React.FC<CardProps> = ({ book }) => {
-  const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const { open, close, dialogProps } = useDialog();
 
   const handleOpenEditDialog = () => {
-    setOpenEditDialog(true);
-  };
-
-  const handleCloseEditDialog = () => {
-    setOpenEditDialog(false);
+    open(
+      'Edit Book',
+      <EditBookFormContent book={book} onClose={close} />,
+      undefined, 
+      'md',
+      true
+    );
   };
 
   const handleOpenDeleteDialog = () => {
-    setOpenDeleteDialog(true);
-  };
-
-  const handleCloseDeleteDialog = () => {
-    setOpenDeleteDialog(false);
+    open(
+      'Confirm Delete',
+      <DeleteConfirmationContent bookId={book.id} bookTitle={book.title} onClose={close} />,
+      undefined 
+    );
   };
 
   return (
@@ -69,13 +71,16 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
           </Button>
         </CardActions>
       </Card>
-      <EditBookDialog book={book} open={openEditDialog} onClose={handleCloseEditDialog} />
-      <DeleteConfirmationDialog
-        bookId={book.id}
-        bookTitle={book.title}
-        open={openDeleteDialog}
-        onClose={handleCloseDeleteDialog}
-      />
+      <CustomDialog
+        open={dialogProps.open}
+        onClose={close}
+        title={dialogProps.title}
+        maxWidth={dialogProps.maxWidth}
+        fullWidth={dialogProps.fullWidth}
+        actions={dialogProps.actions}
+      >
+        {dialogProps.content}
+      </CustomDialog>
     </>
   );
 };
