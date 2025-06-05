@@ -5,13 +5,14 @@ interface BookState {
   books: Book[];
 }
 
-const initialState: BookState = {
-  books: [], 
-};
+interface BookAction {
+  type: 'ADD_BOOK' | 'EDIT_BOOK' | 'DELETE_BOOK';
+  payload: any;
+}
 
-type BookAction =
-  | { type: 'ADD_BOOK'; payload: Book }
-  | { type: 'EDIT_BOOK'; payload: { id: string; updatedBook: Book } };
+const initialState: BookState = {
+  books: [],
+};
 
 const bookReducer = (state: BookState, action: BookAction): BookState => {
   switch (action.type) {
@@ -21,19 +22,27 @@ const bookReducer = (state: BookState, action: BookAction): BookState => {
       return {
         ...state,
         books: state.books.map((book) =>
-          book.id === action.payload.id ? action.payload.updatedBook : book
+          book.id === action.payload.id ? { ...book, ...action.payload.updatedBook } : book
         ),
+      };
+    case 'DELETE_BOOK':
+      return {
+        ...state,
+        books: state.books.filter((book) => book.id !== action.payload),
       };
     default:
       return state;
   }
 };
 
-const BookContext = createContext<{
+interface BookContextType {
   state: BookState;
   addBook: (book: Book) => void;
   editBook: (id: string, updatedBook: Book) => void;
-} | undefined>(undefined);
+  deleteBook: (id: string) => void;
+}
+
+const BookContext = createContext<BookContextType | undefined>(undefined);
 
 export const BookProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(bookReducer, initialState);
@@ -46,8 +55,12 @@ export const BookProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     dispatch({ type: 'EDIT_BOOK', payload: { id, updatedBook } });
   };
 
+  const deleteBook = (id: string) => {
+    dispatch({ type: 'DELETE_BOOK', payload: id });
+  };
+
   return (
-    <BookContext.Provider value={{ state, addBook, editBook }}>
+    <BookContext.Provider value={{ state, addBook, editBook, deleteBook }}>
       {children}
     </BookContext.Provider>
   );

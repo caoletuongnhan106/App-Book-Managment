@@ -1,22 +1,34 @@
-import { useState } from 'react';
 import { Card, CardContent, CardMedia, Typography, CardActions, Button } from '@mui/material';
-import EditBookDialog from './EditBookDialog';
 import type { Book } from '../types';
 import noImage from '../assets/no-image.jpg';
+import useDialog from '../hooks/useDialog';
+import CustomDialog from './CustomDialog';
+import EditBookFormContent from './EditBookFormContent';
+import DeleteConfirmationContent from './DeleteConfirmationContent';
 
 interface CardProps {
   book: Book;
 }
 
 const CardComponent: React.FC<CardProps> = ({ book }) => {
-  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const { open, close, dialogProps } = useDialog();
 
   const handleOpenEditDialog = () => {
-    setOpenEditDialog(true);
+    open(
+      'Edit Book',
+      <EditBookFormContent book={book} onClose={close} />,
+      undefined, 
+      'md',
+      true
+    );
   };
 
-  const handleCloseEditDialog = () => {
-    setOpenEditDialog(false);
+  const handleOpenDeleteDialog = () => {
+    open(
+      'Confirm Delete',
+      <DeleteConfirmationContent bookId={book.id} bookTitle={book.title} onClose={close} />,
+      undefined 
+    );
   };
 
   return (
@@ -54,9 +66,21 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
           <Button size="small" onClick={handleOpenEditDialog}>
             Edit
           </Button>
+          <Button size="small" color="error" onClick={handleOpenDeleteDialog}>
+            Delete
+          </Button>
         </CardActions>
       </Card>
-      <EditBookDialog book={book} open={openEditDialog} onClose={handleCloseEditDialog} />
+      <CustomDialog
+        open={dialogProps.open}
+        onClose={close}
+        title={dialogProps.title}
+        maxWidth={dialogProps.maxWidth}
+        fullWidth={dialogProps.fullWidth}
+        actions={dialogProps.actions}
+      >
+        {dialogProps.content}
+      </CustomDialog>
     </>
   );
 };
