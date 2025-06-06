@@ -1,11 +1,14 @@
 import { useMemo } from 'react';
 import { BookProvider } from './context/BookContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { useBookContext } from './context/BookContext';
 import AddBookForm from './components/AddBookForm';
 import CardComponent from './components/Card';
+import LoginForm from './components/LoginForm';
 import { Container, Box, Typography } from '@mui/material';
 
 function AppContent() {
+  const { user } = useAuth();
   const { state } = useBookContext();
   const books = state.books;
 
@@ -13,12 +16,16 @@ function AppContent() {
     return books ? books.map((book) => <CardComponent key={book.id} book={book} />) : [];
   }, [books]);
 
+  if (!user) {
+    return <LoginForm />;
+  }
+
   return (
     <Container maxWidth="lg" sx={{ mt: 3, backgroundColor: 'background.default', p: 2 }}>
       <Typography variant="h4" align="center" color="primary" gutterBottom>
         Library Management System
       </Typography>
-      <AddBookForm />
+      {user.role === 'admin' && <AddBookForm />}
       <Box
         sx={{
           display: 'flex',
@@ -41,9 +48,11 @@ function AppContent() {
 
 function App() {
   return (
-    <BookProvider>
-      <AppContent />
-    </BookProvider>
+    <AuthProvider>
+      <BookProvider>
+        <AppContent />
+      </BookProvider>
+    </AuthProvider>
   );
 }
 

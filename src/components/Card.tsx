@@ -5,19 +5,21 @@ import useDialog from '../hooks/useDialog';
 import CustomDialog from './CustomDialog';
 import EditBookFormContent from './EditBookFormContent';
 import DeleteConfirmationContent from './DeleteConfirmationContent';
+import { useAuth } from '../context/AuthContext';
 
 interface CardProps {
   book: Book;
 }
 
 const CardComponent: React.FC<CardProps> = ({ book }) => {
+  const { user } = useAuth();
   const { open, close, dialogProps } = useDialog();
 
   const handleOpenEditDialog = () => {
     open(
       'Edit Book',
       <EditBookFormContent book={book} onClose={close} />,
-      undefined, 
+      undefined,
       'md',
       true
     );
@@ -27,7 +29,7 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
     open(
       'Confirm Delete',
       <DeleteConfirmationContent bookId={book.id} bookTitle={book.title} onClose={close} />,
-      undefined 
+      undefined
     );
   };
 
@@ -62,14 +64,16 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
             Condition: {book.bookCondition}
           </Typography>
         </CardContent>
-        <CardActions>
-          <Button size="small" onClick={handleOpenEditDialog}>
-            Edit
-          </Button>
-          <Button size="small" color="error" onClick={handleOpenDeleteDialog}>
-            Delete
-          </Button>
-        </CardActions>
+        {user?.role === 'admin' && (
+          <CardActions>
+            <Button size="small" onClick={handleOpenEditDialog}>
+              Edit
+            </Button>
+            <Button size="small" color="error" onClick={handleOpenDeleteDialog}>
+              Delete
+            </Button>
+          </CardActions>
+        )}
       </Card>
       <CustomDialog
         open={dialogProps.open}
