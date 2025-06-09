@@ -10,16 +10,17 @@ const schema = yup.object({
   password: yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
 }).required();
 
-const LoginForm: React.FC = () => {
-  const { login } = useAuth();
+const Login: React.FC = () => {
+  const { login, user } = useAuth();
   const navigate = useNavigate();
 
   const onSubmit = async (data: any) => {
     try {
       await login(data.email, data.password);
-      navigate('/');
+      if (user) {
+        navigate('/');
+      }
     } catch (error) {
-      console.error('Login failed:', error);
     }
   };
 
@@ -43,4 +44,4 @@ const LoginForm: React.FC = () => {
   );
 };
 
-export default LoginForm;
+export default Login;
