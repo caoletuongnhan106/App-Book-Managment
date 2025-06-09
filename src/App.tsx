@@ -5,10 +5,10 @@ import { useBookContext } from './context/BookContext';
 import AddBookForm from './components/AddBookForm';
 import CardComponent from './components/Card';
 import LoginForm from './components/LoginForm';
-import { Container, Box, Typography } from '@mui/material';
+import { Container, Box, Typography, Button } from '@mui/material';
 
 function AppContent() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { state } = useBookContext();
   const books = state.books;
 
@@ -16,12 +16,21 @@ function AppContent() {
     return books ? books.map((book) => <CardComponent key={book.id} book={book} />) : [];
   }, [books]);
 
+  const handleLogout = () => {
+    logout();
+  };
+
   if (!user) {
     return <LoginForm />;
   }
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3, backgroundColor: 'background.default', p: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Button variant="contained" color="secondary" onClick={handleLogout}>
+          Logout
+        </Button>
+      </Box>
       <Typography variant="h4" align="center" color="primary" gutterBottom>
         Library Management System
       </Typography>
