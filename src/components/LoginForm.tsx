@@ -2,6 +2,7 @@ import { Box, Button, Typography } from '@mui/material';
 import CustomForm from './CustomForm';
 import CustomTextField from './inputs/CustomTextField';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
 const schema = yup.object({
@@ -11,10 +12,12 @@ const schema = yup.object({
 
 const LoginForm: React.FC = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const onSubmit = async (data: any) => {
     try {
       await login(data.email, data.password);
+      navigate('/');
     } catch (error) {
       console.error('Login failed:', error);
     }

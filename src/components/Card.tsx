@@ -64,7 +64,7 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
             Condition: {book.bookCondition}
           </Typography>
         </CardContent>
-        {user?.role === 'admin' && (
+        {user && user.role === 'admin' && ( // Kiểm tra user trước khi truy cập role
           <CardActions>
             <Button size="small" onClick={handleOpenEditDialog}>
               Edit
