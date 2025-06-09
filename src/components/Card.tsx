@@ -5,14 +5,14 @@ import useDialog from '../hooks/useDialog';
 import CustomDialog from './CustomDialog';
 import EditBookFormContent from './EditBookFormContent';
 import DeleteConfirmationContent from './DeleteConfirmationContent';
-import { useAuth } from '../context/AuthContext';
+import useCheckRole from '../hooks/useCheckRole';
 
 interface CardProps {
   book: Book;
 }
 
 const CardComponent: React.FC<CardProps> = ({ book }) => {
-  const { user } = useAuth();
+  const isAdmin = useCheckRole('admin');
   const { open, close, dialogProps } = useDialog();
 
   const handleOpenEditDialog = () => {
@@ -64,7 +64,7 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
             Condition: {book.bookCondition}
           </Typography>
         </CardContent>
-        {user && user.role === 'admin' && ( // Kiểm tra user trước khi truy cập role
+        {isAdmin && (
           <CardActions>
             <Button size="small" onClick={handleOpenEditDialog}>
               Edit
