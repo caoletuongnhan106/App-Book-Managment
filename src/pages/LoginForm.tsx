@@ -1,9 +1,16 @@
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Typography, Snackbar, Alert } from '@mui/material';
 import CustomForm from '../components/CustomForm';
 import CustomTextField from '../components/inputs/CustomTextField';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
+import { useState } from 'react';
+
+interface LoginResult {
+  success: boolean;
+  user?: { email: string; role: string };
+  error?: string;
+}
 
 const schema = yup.object({
   email: yup.string().email('Invalid email').required('Email is required'),
@@ -11,16 +18,33 @@ const schema = yup.object({
 }).required();
 
 const Login: React.FC = () => {
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
 
   const onSubmit = async (data: any) => {
     try {
-      await login(data.email, data.password);
-      if (user) {
+      const result: LoginResult = await login(data.email, data.password);
+      if (result.success) {
+        setSnackbarMessage('Đăng nhập thành công!');
+        setSnackbarSeverity('success');
+        setOpenSnackbar(true);
         navigate('/');
+      } else {
+        setSnackbarMessage(result.error || 'Đăng nhập không thành công!');
+        setSnackbarSeverity('error');
+        setOpenSnackbar(true);
       }
     } catch (error) {
+      setSnackbarMessage('Đã xảy ra lỗi khi đăng nhập!');
+      setSnackbarSeverity('error');
+      setOpenSnackbar(true);
     }
   };
 
@@ -40,6 +64,16 @@ const Login: React.FC = () => {
           Login
         </Button>
       </CustomForm>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
