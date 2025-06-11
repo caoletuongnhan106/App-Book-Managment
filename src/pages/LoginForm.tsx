@@ -4,11 +4,11 @@ import CustomTextField from '../components/inputs/CustomTextField';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
-import { useState } from 'react';
+import { useSnackbar } from '../hooks/useSnackbar';
 
 interface LoginResult {
   success: boolean;
-  user?: { email: string; role: string };
+  user?: { email: string; role: 'admin' | 'user' };
   error?: string;
 }
 
@@ -20,31 +20,16 @@ const schema = yup.object({
 const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
-
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
-  };
+  const { open, message, severity, showMessage, handleClose } = useSnackbar();
 
   const onSubmit = async (data: any) => {
     try {
-      const result: LoginResult = await login(data.email, data.password);
-      if (result.success) {
-        setSnackbarMessage('Đăng nhập thành công!');
-        setSnackbarSeverity('success');
-        setOpenSnackbar(true);
-        navigate('/');
-      } else {
-        setSnackbarMessage(result.error || 'Đăng nhập không thành công!');
-        setSnackbarSeverity('error');
-        setOpenSnackbar(true);
-      }
+      await login(data.email, data.password);
+      showMessage('Đăng nhập thành công!', 'success');
+      navigate('/');
     } catch (error) {
-      setSnackbarMessage('Đã xảy ra lỗi khi đăng nhập!');
-      setSnackbarSeverity('error');
-      setOpenSnackbar(true);
+      const errorMessage = error instanceof Error ? error.message : 'Đăng nhập không thành công!';
+      showMessage(errorMessage, 'error');
     }
   };
 
@@ -65,13 +50,13 @@ const Login: React.FC = () => {
         </Button>
       </CustomForm>
       <Snackbar
-        open={openSnackbar}
+        open={open}
         autoHideDuration={3000}
-        onClose={handleCloseSnackbar}
+        onClose={handleClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
-          {snackbarMessage}
+        <Alert onClose={handleClose} severity={severity} sx={{ width: '100%' }}>
+          {message}
         </Alert>
       </Snackbar>
     </Box>
