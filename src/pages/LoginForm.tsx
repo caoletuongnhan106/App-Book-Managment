@@ -1,14 +1,16 @@
-import { Box, Button, Typography, Snackbar, Alert } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import CustomForm from '../components/CustomForm';
 import CustomTextField from '../components/inputs/CustomTextField';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import { useSnackbar } from '../hooks/useSnackbar';
+import SnackbarComponent from '../components/Snackbar';
+import { RULE_ENUM } from '../context/AuthContext';
 
 interface LoginResult {
   success: boolean;
-  user?: { email: string; role: 'admin' | 'user' };
+  user?: { email: string; role: RULE_ENUM };
   error?: string;
 }
 
@@ -20,7 +22,7 @@ const schema = yup.object({
 const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const { open, message, severity, showMessage, handleClose } = useSnackbar();
+  const { showMessage, handleClose, snackbarProps } = useSnackbar();
 
   const onSubmit = async (data: any) => {
     try {
@@ -49,16 +51,7 @@ const Login: React.FC = () => {
           Login
         </Button>
       </CustomForm>
-      <Snackbar
-        open={open}
-        autoHideDuration={3000}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert onClose={handleClose} severity={severity} sx={{ width: '100%' }}>
-          {message}
-        </Alert>
-      </Snackbar>
+      <SnackbarComponent {...snackbarProps} />
     </Box>
   );
 };

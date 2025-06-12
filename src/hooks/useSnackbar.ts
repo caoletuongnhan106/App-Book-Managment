@@ -1,19 +1,26 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 export const useSnackbar = () => {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [severity, setSeverity] = useState<'success' | 'error'>('success');
 
-  const showMessage = (newMessage: string, newSeverity: 'success' | 'error') => {
+  const showMessage = useCallback((newMessage: string, newSeverity: 'success' | 'error') => {
     setMessage(newMessage);
     setSeverity(newSeverity);
     setOpen(true);
-  };
+  }, []);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setOpen(false);
-  };
+  }, []);
 
-  return { open, message, severity, showMessage, handleClose };
+  const snackbarProps = useMemo(() => ({
+    open,
+    message,
+    severity,
+    onClose: handleClose,
+  }), [open, message, severity, handleClose]);
+
+  return { showMessage, handleClose, snackbarProps };
 };

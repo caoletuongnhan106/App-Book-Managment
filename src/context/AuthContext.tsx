@@ -1,16 +1,18 @@
 import React, { createContext, useContext, useState } from 'react';
 
+enum RULE_ENUM {
+  ADMIN = 'admin',
+  USER = 'user'
+}
+
 interface User {
   id: string;
   email: string;
-  role: 'admin' | 'user';
+  role: RULE_ENUM;
 }
 
-interface TestAccount {
-  id: string;
-  email: string;
+interface TestAccount extends User {
   password: string;
-  role: 'admin' | 'user';
 }
 
 interface LoginResult {
@@ -26,10 +28,10 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
+ 
 const testAccounts: TestAccount[] = [
-  { id: '1', email: 'admin@gmail.com', password: '123456', role: 'admin' },
-  { id: '2', email: 'user@gmail.com', password: '123456', role: 'user' },
+  { id: '1', email: 'admin@gmail.com', password: '123456', role: RULE_ENUM.ADMIN },
+  { id: '2', email: 'user@gmail.com', password: '123456', role: RULE_ENUM.USER },
 ];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -68,4 +70,5 @@ export const useAuth = () => {
   return context;
 };
 
+export {RULE_ENUM};
 export default AuthContext;
