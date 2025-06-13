@@ -1,58 +1,46 @@
-import { useMemo } from 'react';
-import { BookProvider } from './context/BookContext';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { useBookContext } from './context/BookContext';
-import AddBookForm from './components/AddBookForm';
-import CardComponent from './components/Card';
-import LoginForm from './components/LoginForm';
-import { Container, Box, Typography } from '@mui/material';
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import { Navigate } from 'react-router-dom';
+import Login from './pages/LoginForm';
+import Home from './pages/Home';
+import NotFound from './pages/NotFound';
+import { CssBaseline } from '@mui/material';
 
-function AppContent() {
+const ProtectedRoute = () => {
   const { user } = useAuth();
-  const { state } = useBookContext();
-  const books = state.books;
-
-  const bookList = useMemo(() => {
-    return books ? books.map((book) => <CardComponent key={book.id} book={book} />) : [];
-  }, [books]);
-
   if (!user) {
-    return <LoginForm />;
+    return <Navigate to="/login" replace />;
   }
+  return <Outlet />;
+};
 
-  return (
-    <Container maxWidth="lg" sx={{ mt: 3, backgroundColor: 'background.default', p: 2 }}>
-      <Typography variant="h4" align="center" color="primary" gutterBottom>
-        Library Management System
-      </Typography>
-      {user.role === 'admin' && <AddBookForm />}
-      <Box
-        sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          mt: 3,
-          gap: 2,
-        }}
-      >
-        {books && books.length === 0 ? (
-          <Typography align="center" sx={{ width: '100%', color: 'text.secondary' }}>
-            No books available.
-          </Typography>
-        ) : (
-          bookList
-        )}
-      </Box>
-    </Container>
-  );
-}
+const router = createBrowserRouter([
+  {
+    path: '/login',
+    element: <Login />,
+  },
+  {
+    path: '/',
+    element: <ProtectedRoute />,
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+    ],
+  },
+  {
+    path: '*',
+    element: <NotFound />,
+  },
+]);
 
 function App() {
   return (
-    <AuthProvider>
-      <BookProvider>
-        <AppContent />
-      </BookProvider>
-    </AuthProvider>
+    <>
+      <CssBaseline />
+      <RouterProvider router={router} />
+    </>
   );
 }
 
