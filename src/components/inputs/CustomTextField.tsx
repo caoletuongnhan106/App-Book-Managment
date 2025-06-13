@@ -1,30 +1,31 @@
 import { Controller } from 'react-hook-form';
 import { TextField, type TextFieldProps } from '@mui/material';
 
-interface CustomTextFieldProps extends Omit<TextFieldProps, 'onChange' | 'onBlur'> {
+interface CustomTextFieldProps extends Omit<TextFieldProps, 'onChange' | 'onBlur' | 'value'> {
   name: string;
   label: string;
-  onChange?: (value: string) => void;
-  onBlur?: (value: string) => void;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onBlur?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
 const CustomTextField: React.FC<CustomTextFieldProps> = ({ name, label, type = 'text', onChange: propOnChange, onBlur: propOnBlur, ...rest }) => {
   return (
     <Controller
       name={name}
+      defaultValue=""
       render={({ field, fieldState }) => (
         <TextField
           fullWidth
           label={label}
           type={type}
-          {...field}
-          onChange={(e) => {
-            field.onChange(e);
-            if (propOnChange) propOnChange(e.target.value);
+          value={field.value} 
+          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+            field.onChange(e.target.value); 
+            if (propOnChange) propOnChange(e);
           }}
-          onBlur={(e) => {
+          onBlur={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
             field.onBlur();
-            if (propOnBlur) propOnBlur(e.target.value);
+            if (propOnBlur) propOnBlur(e);
           }}
           error={!!fieldState.error}
           helperText={fieldState.error?.message || ''}

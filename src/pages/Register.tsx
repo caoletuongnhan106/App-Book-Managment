@@ -3,28 +3,23 @@ import CustomForm from '../components/CustomForm';
 import CustomTextField from '../components/inputs/CustomTextField';
 import { useAuthForm } from '../hooks/useAuthForm';
 import SnackbarComponent from '../components/Snackbar';
-import { useNavigate } from 'react-router-dom';
 
-const Login: React.FC = () => {
-  const { formMethods, handleSubmit, snackbarProps } = useAuthForm();
-  const navigate = useNavigate();
-
-  const handleRegisterClick = () => {
-    navigate('/register');
-  };
+const Register: React.FC = () => {
+  const { formMethods, handleSubmit, snackbarProps } = useAuthForm('/register');
 
   return (
     <Box sx={{ maxWidth: 400, mx: 'auto', mt: 5, p: 3, backgroundColor: 'background.paper', borderRadius: 8 }}>
       <Typography variant="h5" align="center" gutterBottom sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-        Login
+        Register
       </Typography>
       <CustomForm
-        onSubmit={async () => await handleSubmit(false)}
-        defaultValues={{ email: '', password: '' }}
+        onSubmit={async () => await handleSubmit(true)}
+        defaultValues={{ email: '', password: '', confirmPassword: '' }}
         formMethods={formMethods}
       >
         <CustomTextField name="email" label="Email" type="email" sx={{ mb: 2 }} />
         <CustomTextField name="password" label="Password" type="password" sx={{ mb: 2 }} />
+        <CustomTextField name="confirmPassword" label="Confirm Password" type="password" sx={{ mb: 2 }} />
         <Button
           type="submit"
           variant="contained"
@@ -42,14 +37,14 @@ const Login: React.FC = () => {
             },
           }}
         >
-          Login
+          Register
         </Button>
       </CustomForm>
       <Box sx={{ mt: 2, textAlign: 'center' }}>
         <Button
-          variant="outlined"
+          variant="text"
           color="primary"
-          onClick={handleRegisterClick}
+          onClick={() => window.history.back()}
           sx={{
             borderRadius: 8,
             padding: '6px 16px',
@@ -59,7 +54,7 @@ const Login: React.FC = () => {
             },
           }}
         >
-          Register
+          Back
         </Button>
       </Box>
       <SnackbarComponent {...snackbarProps} />
@@ -67,4 +62,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default Register;
