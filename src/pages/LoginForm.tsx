@@ -1,17 +1,11 @@
 import { Box, Button, Typography } from '@mui/material';
 import CustomForm from '../components/CustomForm';
 import CustomTextField from '../components/inputs/CustomTextField';
-import { useAuthForm } from '../hooks/useAuthForm';
+import { useLoginForm } from '../hooks/useLoginForm';
 import SnackbarComponent from '../components/Snackbar';
-import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
-  const { formMethods, handleSubmit, snackbarProps } = useAuthForm();
-  const navigate = useNavigate();
-
-  const handleRegisterClick = () => {
-    navigate('/register');
-  };
+  const { formMethods, handleSubmit, snackbarProps } = useLoginForm();
 
   return (
     <Box sx={{ maxWidth: 400, mx: 'auto', mt: 5, p: 3, backgroundColor: 'background.paper', borderRadius: 8 }}>
@@ -19,7 +13,7 @@ const Login: React.FC = () => {
         Login
       </Typography>
       <CustomForm
-        onSubmit={async () => await handleSubmit(false)}
+        onSubmit={async () => await handleSubmit()}
         defaultValues={{ email: '', password: '' }}
         formMethods={formMethods}
       >
@@ -49,7 +43,7 @@ const Login: React.FC = () => {
         <Button
           variant="outlined"
           color="primary"
-          onClick={handleRegisterClick}
+          href="/register" 
           sx={{
             borderRadius: 8,
             padding: '6px 16px',
@@ -59,7 +53,7 @@ const Login: React.FC = () => {
             },
           }}
         >
-          Register
+          Đăng ký
         </Button>
       </Box>
       <SnackbarComponent {...snackbarProps} />

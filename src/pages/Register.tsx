@@ -1,11 +1,11 @@
 import { Box, Button, Typography } from '@mui/material';
 import CustomForm from '../components/CustomForm';
 import CustomTextField from '../components/inputs/CustomTextField';
-import { useAuthForm } from '../hooks/useAuthForm';
+import { useRegisterForm } from '../hooks/useRegisterForm';
 import SnackbarComponent from '../components/Snackbar';
 
 const Register: React.FC = () => {
-  const { formMethods, handleSubmit, snackbarProps } = useAuthForm('/register');
+  const { formMethods, handleSubmit, snackbarProps } = useRegisterForm();
 
   return (
     <Box sx={{ maxWidth: 400, mx: 'auto', mt: 5, p: 3, backgroundColor: 'background.paper', borderRadius: 8 }}>
@@ -13,7 +13,7 @@ const Register: React.FC = () => {
         Register
       </Typography>
       <CustomForm
-        onSubmit={async () => await handleSubmit(true)}
+        onSubmit={async () => await handleSubmit()}
         defaultValues={{ email: '', password: '', confirmPassword: '' }}
         formMethods={formMethods}
       >
@@ -44,7 +44,7 @@ const Register: React.FC = () => {
         <Button
           variant="text"
           color="primary"
-          onClick={() => window.history.back()}
+          href="/login"
           sx={{
             borderRadius: 8,
             padding: '6px 16px',
@@ -54,7 +54,7 @@ const Register: React.FC = () => {
             },
           }}
         >
-          Back
+          Quay lại
         </Button>
       </Box>
       <SnackbarComponent {...snackbarProps} />

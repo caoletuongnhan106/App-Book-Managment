@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 
 enum RULE_ENUM {
   ADMIN = 'admin',
-  USER = 'user'
+  USER = 'user',
 }
 
 interface User {
@@ -39,22 +39,16 @@ const initialTestAccounts: TestAccount[] = [
   const [testAccounts, setTestAccounts] = useState<TestAccount[]>(initialTestAccounts);
   const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    console.log('User state updated:', user);
-    console.log('Current testAccounts:', testAccounts);
-  }, [user, testAccounts]);
+  useEffect(() => {},
+ [user, testAccounts]);
 
   const login = useCallback(
     async (email: string, password: string): Promise<AuthResult> => {
-      console.log('Attempting login with:', { email, password });
-      console.log('Available testAccounts:', testAccounts);
       const account = testAccounts.find((acc) => acc.email === email && acc.password === password);
       if (account) {
-        console.log('Account found:', account);
         setUser({ id: account.id, email: account.email, role: account.role });
         return { success: true, user: { id: account.id, email: account.email, role: account.role } };
       } else {
-        console.log('No account found, checking matches:', testAccounts.some(acc => acc.email === email && acc.password === password));
         return { success: false, error: 'Invalid email or password' };
       }
     },
@@ -63,11 +57,8 @@ const initialTestAccounts: TestAccount[] = [
 
   const register = useCallback(
     async (email: string, password: string): Promise<AuthResult> => {
-      console.log('Attempting register with:', { email, password });
-      console.log('Current testAccounts before check:', testAccounts);
       const existingAccount = testAccounts.find((acc) => acc.email === email);
       if (existingAccount) {
-        console.log('Email already exists:', existingAccount);
         return { success: false, error: 'Email already exists' };
       }
       const newUser: TestAccount = {
@@ -76,14 +67,11 @@ const initialTestAccounts: TestAccount[] = [
         password,
         role: RULE_ENUM.USER,
       };
-      console.log('New user to add:', newUser);
-      setTestAccounts((prev: TestAccount[]) => { 
+      setTestAccounts((prev: TestAccount[]) => {
         const updatedAccounts = [...prev, newUser];
-        console.log('Updated testAccounts:', updatedAccounts);
         return updatedAccounts;
       });
       setUser({ id: newUser.id, email: newUser.email, role: newUser.role });
-      console.log('User set to:', { id: newUser.id, email: newUser.email, role: newUser.role });
       return { success: true, user: { id: newUser.id, email: newUser.email, role: newUser.role } };
     },
     [testAccounts]
