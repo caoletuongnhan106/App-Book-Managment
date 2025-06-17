@@ -3,9 +3,11 @@ import CustomForm from '../components/CustomForm';
 import CustomTextField from '../components/inputs/CustomTextField';
 import { useLoginForm } from '../hooks/useLoginForm';
 import SnackbarComponent from '../components/Snackbar';
+import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
-  const { formMethods, handleSubmit, snackbarProps } = useLoginForm();
+  const { handleSubmit, snackbarProps } = useLoginForm();
+  const navigate = useNavigate();
 
   return (
     <Box sx={{ maxWidth: 400, mx: 'auto', mt: 5, p: 3, backgroundColor: 'background.paper', borderRadius: 8 }}>
@@ -15,7 +17,6 @@ const Login: React.FC = () => {
       <CustomForm
         onSubmit={async () => await handleSubmit()}
         defaultValues={{ email: '', password: '' }}
-        formMethods={formMethods}
       >
         <CustomTextField name="email" label="Email" type="email" sx={{ mb: 2 }} />
         <CustomTextField name="password" label="Password" type="password" sx={{ mb: 2 }} />
@@ -43,7 +44,7 @@ const Login: React.FC = () => {
         <Button
           variant="outlined"
           color="primary"
-          href="/register" 
+          onClick={() => navigate('/register')}
           sx={{
             borderRadius: 8,
             padding: '6px 16px',

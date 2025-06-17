@@ -1,20 +1,18 @@
 import React from 'react';
-import {FormProvider, useForm, type UseFormReturn, type DefaultValues,
-} from 'react-hook-form';
+import { FormProvider, useForm,type UseFormReturn } from 'react-hook-form';
 import { Box } from '@mui/material';
 
 interface FormData {
   email: string;
   password: string;
-  confirmPassword?: string;
+  confirmPassword?: string; 
 }
 
 interface CustomFormProps<T extends Record<string, any> = FormData> {
   onSubmit: (data: T) => Promise<void>;
-  defaultValues: DefaultValues<T>;
+  defaultValues: UseFormReturn<T>['formState']['defaultValues']; 
   validationSchema?: any;
   children: React.ReactNode;
-  formMethods?: UseFormReturn<T>;
 }
 
 const CustomForm = <T extends Record<string, any> = FormData>({
@@ -22,9 +20,10 @@ const CustomForm = <T extends Record<string, any> = FormData>({
   defaultValues,
   validationSchema,
   children,
-  formMethods,
 }: CustomFormProps<T>) => {
-  const methods = formMethods || useForm<T>({ defaultValues, resolver: validationSchema });
+  const methods = useForm<T>({ 
+    defaultValues : defaultValues as any, 
+    resolver: validationSchema });
 
   const handleSubmitWrapper = methods.handleSubmit(async (data) => {
     await onSubmit(data);

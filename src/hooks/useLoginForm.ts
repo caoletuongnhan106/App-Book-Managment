@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import { useAuth } from '../context/AuthContext';
 import { useSnackbar } from './useSnackbar';
-import { useForm,type UseFormReturn } from 'react-hook-form';
+import { useForm} from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 interface LoginFormData {
   email: string;
@@ -17,7 +18,6 @@ interface AuthResult {
 }
 
 interface UseLoginFormReturn {
-  formMethods: UseFormReturn<LoginFormData>;
   handleSubmit: () => Promise<void>;
   snackbarProps: ReturnType<typeof useSnackbar>['snackbarProps'];
 }
@@ -37,22 +37,10 @@ export const useLoginForm = (): UseLoginFormReturn => {
 
   const formMethods = useForm<LoginFormData>({
     defaultValues: { email: '', password: '' },
-    resolver: async (values) =>
-      loginSchema.validate(values, { abortEarly: false })
-        .then(() => ({ values, errors: {} }))
-        .catch((err: yup.ValidationError) => ({
-          values: {},
-          errors: err.inner.reduce<Record<string, any>>((acc, e: yup.ValidationError) => ({
-            ...acc,
-            [e.path!]: { type: e.type ?? 'validation', message: e.message }
-          }), {})
-        })),
-    
+    resolver: yupResolver(loginSchema),
   });
 
   const handleSubmit = useCallback(async () => {
-    formMethods.clearErrors();
-    await formMethods.trigger();
     const isValid = await formMethods.trigger();
 
     if (isValid) {
@@ -72,5 +60,5 @@ export const useLoginForm = (): UseLoginFormReturn => {
     }
   }, [formMethods, login, showMessage, navigate]);
 
-  return { formMethods, handleSubmit, snackbarProps };
+  return { handleSubmit, snackbarProps };
 };

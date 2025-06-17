@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
 enum RULE_ENUM {
   ADMIN = 'admin',
@@ -38,9 +38,6 @@ const initialTestAccounts: TestAccount[] = [
  const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [testAccounts, setTestAccounts] = useState<TestAccount[]>(initialTestAccounts);
   const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {},
- [user, testAccounts]);
 
   const login = useCallback(
     async (email: string, password: string): Promise<AuthResult> => {
