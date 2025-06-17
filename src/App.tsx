@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import Login from './pages/LoginForm';
+import Register from './pages/Register';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import { CssBaseline } from '@mui/material';
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <Login />,
+  },
+  {
+    path: '/register',
+    element: <Register />, 
   },
   {
     path: '/',
