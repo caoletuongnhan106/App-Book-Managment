@@ -1,31 +1,41 @@
-import type { ReactNode } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
-import type { UseFormReturn } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
+import React from 'react';
+import { FormProvider, useForm,type UseFormReturn } from 'react-hook-form';
+import { Box } from '@mui/material';
 
-interface FormProps {
-  onSubmit: (data: any, methods: UseFormReturn<any>) => void;
-  children: ReactNode;
-  defaultValues?: Record<string, any>;
-  validationSchema?: yup.AnyObjectSchema;
+interface FormData {
+  email: string;
+  password: string;
+  confirmPassword?: string; 
 }
 
-const Form: React.FC<FormProps> = ({ onSubmit, children, defaultValues = {}, validationSchema = yup.object({}) }) => {
-  const methods: UseFormReturn<any> = useForm({
-    resolver: yupResolver(validationSchema),
-    defaultValues,
-  });
+interface CustomFormProps<T extends Record<string, any> = FormData> {
+  onSubmit: (data: T) => Promise<void>;
+  defaultValues: UseFormReturn<T>['formState']['defaultValues']; 
+  validationSchema?: any;
+  children: React.ReactNode;
+}
 
-  const handleSubmit = (data: any) => {
-    onSubmit(data, methods);
-  };
+const CustomForm = <T extends Record<string, any> = FormData>({
+  onSubmit,
+  defaultValues,
+  validationSchema,
+  children,
+}: CustomFormProps<T>) => {
+  const methods = useForm<T>({ 
+    defaultValues : defaultValues as any, 
+    resolver: validationSchema });
+
+  const handleSubmitWrapper = methods.handleSubmit(async (data) => {
+    await onSubmit(data);
+  });
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(handleSubmit)}>{children}</form>
+      <Box component="form" onSubmit={handleSubmitWrapper} noValidate>
+        {children}
+      </Box>
     </FormProvider>
   );
 };
 
-export default Form;
+export default CustomForm;
