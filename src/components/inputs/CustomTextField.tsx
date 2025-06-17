@@ -1,14 +1,13 @@
 import { Controller } from 'react-hook-form';
 import { TextField, type TextFieldProps } from '@mui/material';
-import {type UseFormReturn } from 'react-hook-form'; 
+import { useFormContext } from 'react-hook-form';
 
 interface CustomTextFieldProps extends Omit<TextFieldProps, 'onChange' | 'onBlur' | 'value'> {
   name: string;
   label: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onBlur?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  transform?: (value: string) => string; 
-  control?: UseFormReturn['control']; 
+  transform?: (value: string) => string;
 }
 
 const CustomTextField: React.FC<CustomTextFieldProps> = ({
@@ -18,9 +17,10 @@ const CustomTextField: React.FC<CustomTextFieldProps> = ({
   onChange: propOnChange,
   onBlur: propOnBlur,
   transform = (value) => value?.trim() || '',
-  control,
   ...rest
 }) => {
+  const { control } = useFormContext(); 
+
   return (
     <Controller
       name={name}

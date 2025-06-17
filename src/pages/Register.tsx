@@ -3,12 +3,10 @@ import CustomForm from '../components/CustomForm';
 import CustomTextField from '../components/inputs/CustomTextField';
 import { useRegisterForm } from '../hooks/useRegisterForm';
 import SnackbarComponent from '../components/Snackbar';
-import { useFormContext } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
 const Register: React.FC = () => {
   const { handleSubmit, snackbarProps } = useRegisterForm();
-  const { control } = useFormContext(); 
   const navigate = useNavigate();
 
   return (
@@ -20,9 +18,9 @@ const Register: React.FC = () => {
         onSubmit={async () => await handleSubmit()}
         defaultValues={{ email: '', password: '', confirmPassword: '' }}
       >
-        <CustomTextField name="email" label="Email" type="email" control={control} sx={{ mb: 2 }} />
-        <CustomTextField name="password" label="Password" type="password" control={control} sx={{ mb: 2 }} />
-        <CustomTextField name="confirmPassword" label="Confirm Password" type="password" control={control} sx={{ mb: 2 }} />
+        <CustomTextField name="email" label="Email" type="email" sx={{ mb: 2 }} />
+        <CustomTextField name="password" label="Password" type="password" sx={{ mb: 2 }} />
+        <CustomTextField name="confirmPassword" label="Confirm Password" type="password" sx={{ mb: 2 }} />
         <Button
           type="submit"
           variant="contained"
@@ -45,7 +43,7 @@ const Register: React.FC = () => {
       </CustomForm>
       <Box sx={{ mt: 2, textAlign: 'center' }}>
         <Button
-          variant="text"
+          variant="outlined"
           color="primary"
           onClick={() => navigate('/login')}
           sx={{
