@@ -35,7 +35,7 @@ const initialTestAccounts: TestAccount[] = [
   { id: '2', email: 'user@gmail.com', password: '123456', role: RULE_ENUM.USER },
 ];
 
- const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [testAccounts, setTestAccounts] = useState<TestAccount[]>(initialTestAccounts);
   const [user, setUser] = useState<User | null>(null);
 
@@ -45,9 +45,8 @@ const initialTestAccounts: TestAccount[] = [
       if (account) {
         setUser({ id: account.id, email: account.email, role: account.role });
         return { success: true, user: { id: account.id, email: account.email, role: account.role } };
-      } else {
-        return { success: false, error: 'Invalid email or password' };
       }
+      return { success: false, error: 'Invalid email or password' };
     },
     [testAccounts]
   );
@@ -64,10 +63,7 @@ const initialTestAccounts: TestAccount[] = [
         password,
         role: RULE_ENUM.USER,
       };
-      setTestAccounts((prev: TestAccount[]) => {
-        const updatedAccounts = [...prev, newUser];
-        return updatedAccounts;
-      });
+      setTestAccounts((prev) => [...prev, newUser]);
       setUser({ id: newUser.id, email: newUser.email, role: newUser.role });
       return { success: true, user: { id: newUser.id, email: newUser.email, role: newUser.role } };
     },
@@ -85,7 +81,7 @@ const initialTestAccounts: TestAccount[] = [
   );
 };
 
- const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
@@ -93,4 +89,4 @@ const initialTestAccounts: TestAccount[] = [
   return context;
 };
 
-export { RULE_ENUM, AuthProvider, useAuth, AuthContext };
+export { RULE_ENUM, AuthContext };
