@@ -1,72 +1,124 @@
 import { useState, useEffect, useCallback } from 'react';
-import { loanApi,type Loan } from '../api/loans';
 import { useAuth } from '../context/AuthContext';
+import { useBookContext } from '../context/BookContext';
+import {
+  getLoansByUser,
+  borrowBook,
+  returnBook,
+  type Loan
+} from '../api/loans';
 
-export const useLoanManagement = (userId?: number) => {
+interface UseLoanManagementProps {
+  isAdmin?: boolean;
+  userIdOverride?: number;
+}
+
+export const useLoanManagement = ({
+  isAdmin = false,
+  userIdOverride,
+}: UseLoanManagementProps = {}) => {
   const { user } = useAuth();
+  const { state: { books } } = useBookContext();
+  const loggedInUserId = user?.id ? Number(user.id) : null;
+  const userId = isAdmin ? userIdOverride ?? null : loggedInUserId;
+  const userName = user?.email || `User ${userId}`; 
+
   const [loans, setLoans] = useState<Loan[]>([]);
-  const [availableBooks] = useState<number[]>([1, 2, 3]);
-  const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
+  const [availableBooks, setAvailableBooks] = useState<{ id: string; title: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchLoans = useCallback(async () => {
-    if (!userId && !user?.id) return;
+    if (userId == null && !isAdmin) return;
     setLoading(true);
     try {
-        const data = await loanApi.getLoansByUser(Number(userId || user!.id));
-
+      const data = await getLoansByUser(isAdmin ? 0 : userId!, isAdmin);
       setLoans(data);
       setError(null);
-    } catch (err) {
-      setError('Lỗi khi tải danh sách mượn sách');
+    } catch (err: any) {
+      setError(err.message);
+      setLoans([]);
     } finally {
       setLoading(false);
     }
-  }, [userId, user?.id]);
+  }, [userId, isAdmin]);
+
+  const fetchLoansByUser = useCallback(
+    async (targetUserId: number) => {
+      if (!isAdmin) return;
+      setLoading(true);
+      try {
+        const data = await getLoansByUser(targetUserId, isAdmin);
+        setLoans(data);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message);
+        setLoans([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isAdmin]
+  );
+
+  const refreshAvailable = useCallback(() => {
+    const borrowedIds = loans.map((l) => l.bookId);
+    const avail = books
+      .filter((b) => b.isAvailable && !borrowedIds.includes(b.id))
+      .map((b) => ({ id: b.id, title: b.title }));
+    setAvailableBooks(avail);
+  }, [books, loans]);
+
+  const handleBorrow = useCallback(
+    async (bookId: string, bookTitle: string, returnDate?: string) => {
+      if (userId == null) return;
+      setLoading(true);
+      try {
+        const loan = await borrowBook(userId, bookId, bookTitle, userName, returnDate); 
+        setLoans((prev) => [...prev, loan]);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+        await fetchLoans();
+      }
+    },
+    [userId, userName, fetchLoans]
+  );
+
+  const handleReturn = useCallback(
+    async (loanId: number) => {
+      setLoading(true);
+      try {
+        await returnBook(loanId);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+        await fetchLoans();
+      }
+    },
+    [fetchLoans]
+  );
 
   useEffect(() => {
     fetchLoans();
   }, [fetchLoans]);
 
-  const handleBorrow = useCallback(async () => {
-    if (!userId && !user?.id || !selectedBookId) return;
-    setLoading(true);
-    try {
-        const loan = await loanApi.borrowBook(Number(userId || user!.id), Number(selectedBookId));
-
-      setLoans((prev) => [...prev, loan]);
-      setSelectedBookId(null);
-      setError(null);
-    } catch (err) {
-      setError('Lỗi khi mượn sách');
-    } finally {
-      setLoading(false);
-    }
-  }, [userId, user?.id, selectedBookId]);
-
-  const handleReturn = useCallback(async (loanId: number) => {
-    setLoading(true);
-    try {
-      await loanApi.returnBook(loanId);
-      setLoans((prev) => prev.filter((loan) => loan.id !== loanId));
-      setError(null);
-    } catch (err) {
-      setError('Lỗi khi trả sách');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  useEffect(() => {
+    refreshAvailable();
+  }, [refreshAvailable]);
 
   return {
     loans,
     availableBooks,
-    selectedBookId,
-    setSelectedBookId: (value: number | null) => setSelectedBookId(value), 
-    handleBorrow,
-    handleReturn,
     loading,
     error,
-    refreshLoans: fetchLoans,
+    handleBorrow,
+    handleReturn,
+    fetchLoans,
+    fetchLoansByUser,
   };
 };

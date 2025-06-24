@@ -8,6 +8,7 @@ enum RULE_ENUM {
 interface User {
   id: string;
   email: string;
+  name?: string;
   role: RULE_ENUM;
 }
 

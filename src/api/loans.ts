@@ -1,27 +1,54 @@
-import axios from 'axios';
+export const API_URL = '/api/loans';
 
 export interface Loan {
   id: number;
   userId: number;
   userName: string;
-  bookId: number;
+  bookId: string;
   bookTitle: string;
   loanDate: string;
   returnDate?: string;
 }
 
-const API_URL = '/api/loans';
+let mockLoans: Loan[] = [];
 
-export const loanApi = {
-  getLoansByUser: async (userId: number): Promise<Loan[]> => {
-    const response = await axios.get(`${API_URL}/user/${userId}`);
-    return response.data;
-  },
-  borrowBook: async (userId: number, bookId: number): Promise<Loan> => {
-    const response = await axios.post(`${API_URL}/borrow`, { userId, bookId });
-    return response.data;
-  },
-  returnBook: async (loanId: number): Promise<void> => {
-    await axios.post(`${API_URL}/return`, { loanId });
-  },
+const getRandomLoanDate = () => {
+  const today = new Date();
+  const randomDays = Math.floor(Math.random() * 3) - 1;
+  today.setDate(today.getDate() + randomDays);
+  return today.toISOString().split('T')[0];
+};
+
+export const getLoansByUser = async (userId: number, isAdmin?: boolean): Promise<Loan[]> => {
+  if (isAdmin) {
+    return mockLoans;
+  }
+  return mockLoans.filter((loan) => loan.userId === userId);
+};
+
+export const borrowBook = async (
+  userId: number,
+  bookId: string,
+  bookTitle: string,
+  userName: string,
+  returnDate?: string 
+): Promise<Loan> => {
+  if (!bookId) throw new Error('bookId không hợp lệ');
+  const loan: Loan = {
+    id: Date.now(),
+    userId,
+    userName, 
+    bookId,
+    bookTitle,
+    loanDate: getRandomLoanDate(),
+    returnDate
+  };
+  mockLoans.push(loan);
+  return loan;
+};
+
+export const returnBook = async (loanId: number): Promise<void> => {
+  mockLoans = mockLoans.map((loan) =>
+    loan.id === loanId ? { ...loan, returnDate: getRandomLoanDate() } : loan
+  ).filter((loan) => loan.returnDate !== undefined);
 };

@@ -1,44 +1,32 @@
-import { Box, Typography } from '@mui/material';
+import React from 'react';
+import { Box, Typography, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import LoanAction from '../components/LoanAction';
+import LoanTable from '../components/LoanTable';
 import { useLoanManagement } from '../hooks/useLoanManagement';
-import LoanForm from '../components/LoanForm';
-import LoanItem from '../components/LoanItem';
 
 const UserLoans: React.FC = () => {
+  const navigate = useNavigate();
   const {
     loans,
     availableBooks,
-    selectedBookId,
-    setSelectedBookId,
-    handleBorrow,
-    handleReturn,
     loading,
     error,
+    handleBorrow,
+    handleReturn
   } = useLoanManagement();
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h5" gutterBottom>
-        Quản lý mượn/trả sách
-      </Typography>
+      <Button onClick={() => navigate('/')} sx={{ mb: 2 }}>Back</Button>
+      <Typography variant="h5" gutterBottom>Quản lý mượn/trả sách</Typography>
       {error && <Typography color="error">{error}</Typography>}
-      <LoanForm
+      <LoanAction
         availableBooks={availableBooks}
-        selectedBookId={selectedBookId}
-        onSelectChange={setSelectedBookId}
         onBorrow={handleBorrow}
         loading={loading}
       />
-      <Typography variant="h6" sx={{ mt: 2 }}>
-        Danh sách mượn sách
-      </Typography>
-      {loans.map((loan) => (
-        <LoanItem
-          key={loan.id}
-          loan={loan}
-          onReturn={handleReturn}
-          isReturnable={!loan.returnDate} 
-        />
-      ))}
+      <LoanTable loans={loans} onReturn={handleReturn} loading={loading} />
     </Box>
   );
 };

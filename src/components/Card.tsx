@@ -1,4 +1,8 @@
-import { Card, CardContent, CardMedia, Typography, CardActions, Button } from '@mui/material';
+import { useState } from 'react';
+import {
+  Card, CardContent, CardMedia, Typography, CardActions,
+  Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField
+} from '@mui/material';
 import type { Book } from '../types';
 import noImage from '../assets/no-image.jpg';
 import useDialog from '../hooks/useDialog';
@@ -6,14 +10,19 @@ import CustomDialog from './CustomDialog';
 import EditBookFormContent from './EditBookFormContent';
 import DeleteConfirmationContent from './DeleteConfirmationContent';
 import useCheckRole from '../hooks/useCheckRole';
+import { useLoanManagement } from '../hooks/useLoanManagement';
 
 interface CardProps {
-  book: Book;
+  book: Book & { id: string };
 }
 
 const CardComponent: React.FC<CardProps> = ({ book }) => {
   const isAdmin = useCheckRole('admin');
   const { open, close, dialogProps } = useDialog();
+  const { handleBorrow, handleReturn, loans } = useLoanManagement();
+  const [openBorrowDialog, setOpenBorrowDialog] = useState(false);
+  const [returnDate, setReturnDate] = useState('');
+  const loan = Array.isArray(loans) ? loans.find((l) => l.bookId === book.id) : undefined;
 
   const handleOpenEditDialog = () => {
     open(
@@ -33,58 +42,74 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
     );
   };
 
+  const handleBorrowClick = () => {
+    setOpenBorrowDialog(true);
+  };
+
+  const confirmBorrow = () => {
+    if (!book.id || typeof book.id !== 'string' || book.id.trim() === '') return;
+    handleBorrow(book.id, book.title, returnDate);
+    setOpenBorrowDialog(false);
+  };
+
+  const handleReturnClick = () => {
+    if (loan) {
+      handleReturn(loan.id);
+    }
+  };
+
   return (
     <>
       <Card sx={{ width: 300, m: 1 }}>
-        <CardMedia
-          sx={{ height: 140 }}
-          image={book.imageUrl || noImage}
-          title={book.title}
-        />
+        <CardMedia sx={{ height: 140 }} image={book.imageUrl || noImage} title={book.title} />
         <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
-            {book.title}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Author: {book.author}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Year: {book.year}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Quantity: {book.quantity}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Category: {book.category}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Available: {book.isAvailable ? 'Yes' : 'No'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Condition: {book.bookCondition}
-          </Typography>
+          <Typography gutterBottom variant="h5">{book.title}</Typography>
+          <Typography variant="body2">Author: {book.author}</Typography>
+          <Typography variant="body2">Year: {book.year}</Typography>
+          <Typography variant="body2">Quantity: {book.quantity}</Typography>
+          <Typography variant="body2">Category: {book.category}</Typography>
+          <Typography variant="body2">Available: {book.isAvailable ? 'Yes' : 'No'}</Typography>
+          <Typography variant="body2">Condition: {book.bookCondition}</Typography>
         </CardContent>
-        {isAdmin && (
-          <CardActions>
-            <Button size="small" onClick={handleOpenEditDialog}>
-              Edit
-            </Button>
-            <Button size="small" color="error" onClick={handleOpenDeleteDialog}>
-              Delete
-            </Button>
-          </CardActions>
-        )}
+        <CardActions>
+          {!isAdmin ? (
+            <>
+              <Button size="small" variant="contained" onClick={handleBorrowClick} disabled={!!loan || book.quantity <= 0}>MƯỢN SÁCH</Button>
+              <Button size="small" variant="outlined" onClick={handleReturnClick} disabled={!loan}>TRẢ SÁCH</Button>
+            </>
+          ) : (
+            <>
+              <Button size="small" onClick={handleOpenEditDialog}>Edit</Button>
+              <Button size="small" color="error" onClick={handleOpenDeleteDialog}>Delete</Button>
+            </>
+          )}
+        </CardActions>
       </Card>
-      <CustomDialog
-        open={dialogProps.open}
-        onClose={close}
-        title={dialogProps.title}
-        maxWidth={dialogProps.maxWidth}
-        fullWidth={dialogProps.fullWidth}
-        actions={dialogProps.actions}
-      >
+
+      <CustomDialog {...dialogProps} onClose={close}>
         {dialogProps.content}
       </CustomDialog>
+
+
+      <Dialog open={openBorrowDialog} onClose={() => setOpenBorrowDialog(false)}>
+        <DialogTitle>Xác nhận mượn sách</DialogTitle>
+        <DialogContent>
+          <Typography>Bạn có chắc muốn mượn sách "{book.title}"?</Typography>
+          <TextField
+            fullWidth
+            type="date"
+            label="Ngày trả dự kiến"
+            InputLabelProps={{ shrink: true }}
+            value={returnDate}
+            onChange={(e) => setReturnDate(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenBorrowDialog(false)}>Hủy</Button>
+          <Button onClick={confirmBorrow} color="primary">Xác nhận</Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
