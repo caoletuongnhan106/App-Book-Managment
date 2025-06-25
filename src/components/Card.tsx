@@ -74,7 +74,7 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
         <CardActions>
           {!isAdmin ? (
             <>
-              <Button size="small" variant="contained" onClick={handleBorrowClick} disabled={!!loan || book.quantity <= 0}>MƯỢN SÁCH</Button>
+              <Button size="small" variant="contained" onClick={handleBorrowClick} disabled={Boolean(loan) || book.quantity <= 0}>MƯỢN SÁCH</Button>
               <Button size="small" variant="outlined" onClick={handleReturnClick} disabled={!loan}>TRẢ SÁCH</Button>
             </>
           ) : (
