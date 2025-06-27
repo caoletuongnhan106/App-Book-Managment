@@ -31,7 +31,7 @@ export const borrowBook = async (
   bookId: string,
   bookTitle: string,
   userName: string,
-  returnDate?: string 
+  _returnDate?: string 
 ): Promise<Loan> => {
   if (!bookId) throw new Error('bookId không hợp lệ');
   const loan: Loan = {
@@ -40,8 +40,7 @@ export const borrowBook = async (
     userName, 
     bookId,
     bookTitle,
-    loanDate: getRandomLoanDate(),
-    returnDate
+    loanDate: new Date().toISOString().split('T')[0],
   };
   mockLoans.push(loan);
   return loan;
@@ -49,6 +48,8 @@ export const borrowBook = async (
 
 export const returnBook = async (loanId: number): Promise<void> => {
   mockLoans = mockLoans.map((loan) =>
-    loan.id === loanId ? { ...loan, returnDate: getRandomLoanDate() } : loan
-  ).filter((loan) => loan.returnDate !== undefined);
+    loan.id === loanId ? { ...loan, returnDate: new Date().toISOString().split('T')[0] } : loan
+  );
 };
+
+

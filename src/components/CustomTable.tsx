@@ -7,6 +7,7 @@ import {
   Paper,
   TableContainer,
   TablePagination,
+  CircularProgress,
 } from '@mui/material';
 
 interface Column {
@@ -22,6 +23,7 @@ interface CustomTableProps {
   rowsPerPage?: number;
   onPageChange: (newPage: number) => void;
   onRowsPerPageChange: (newRowsPerPage: number) => void;
+  loading?: boolean;
 }
 
 const CustomTable: React.FC<CustomTableProps> = ({
@@ -31,6 +33,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   rowsPerPage = 5,
   onPageChange,
   onRowsPerPageChange,
+  loading = false,
 }) => {
   const handleChangePage = (_event: unknown, newPage: number) => {
     onPageChange(newPage);
@@ -44,7 +47,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
   return (
     <Paper>
-      <TableContainer component={Paper}>
+      <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
@@ -54,19 +57,33 @@ const CustomTable: React.FC<CustomTableProps> = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {data
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row, idx) => (
-                <TableRow key={idx}>
-                  {columns.map((column) => (
-                    <TableCell key={column.id}>
-                      {column.render
-                        ? column.render(row[column.id] ?? '', row)
-                        : row?.[column.id] ?? ''}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} align="center">
+                  <CircularProgress size={24} />
+                </TableCell>
+              </TableRow>
+            ) : data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} align="center">
+                  Không có dữ liệu.
+                </TableCell>
+              </TableRow>
+            ) : (
+              data
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row, idx) => (
+                  <TableRow key={idx}>
+                    {columns.map((column) => (
+                      <TableCell key={column.id}>
+                        {column.render
+                          ? column.render(row[column.id], row)
+                          : row?.[column.id] ?? ''}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>

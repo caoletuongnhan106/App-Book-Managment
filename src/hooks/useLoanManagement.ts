@@ -74,14 +74,13 @@ export const useLoanManagement = ({
       if (userId == null) return;
       setLoading(true);
       try {
-        const loan = await borrowBook(userId, bookId, bookTitle, userName, returnDate); 
-        setLoans((prev) => [...prev, loan]);
+        await borrowBook(userId, bookId, bookTitle, userName, returnDate);
+        await fetchLoans(); 
         setError(null);
       } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
-        await fetchLoans();
       }
     },
     [userId, userName, fetchLoans]
@@ -92,12 +91,12 @@ export const useLoanManagement = ({
       setLoading(true);
       try {
         await returnBook(loanId);
+        await fetchLoans(); 
         setError(null);
       } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
-        await fetchLoans();
       }
     },
     [fetchLoans]

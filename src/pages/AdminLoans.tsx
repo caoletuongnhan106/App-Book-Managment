@@ -8,7 +8,6 @@ import { useTable } from '../hooks/useTable';
 const AdminLoans: React.FC = () => {
   const { loans, loading, error, fetchLoans } = useLoanManagement({ isAdmin: true });
   const navigate = useNavigate();
-
   const table = useTable({ initialData: loans });
 
   useEffect(() => {
@@ -33,22 +32,20 @@ const AdminLoans: React.FC = () => {
     <Box sx={{ p: 3 }}>
       <Button variant="outlined" onClick={handleBack} sx={{ mb: 2 }}>BACK</Button>
       <Typography variant="h5" gutterBottom>Quản lý mượn/trả sách (Admin)</Typography>
-      {loading && <Typography>Loading...</Typography>}
-      {error && <Typography color="error">{error}</Typography>}
-      {!loading && !error && (
-        <CustomTable
-          columns={columns}
-          data={table.data.map((row) => ({
-            ...row,  
-            loanDate: new Date(row.loanDate).toLocaleDateString('vi-VN'),
-            returnDate: row.returnDate ? new Date(row.returnDate).toLocaleDateString('vi-VN') : 'Chưa trả',
-          }))}
-          page={table.page}
-          rowsPerPage={table.rowsPerPage}
-          onPageChange={table.handleChangePage}
-          onRowsPerPageChange={table.handleChangeRowsPerPage}
-        />
-      )}
+      <CustomTable
+        loading={loading}
+        columns={columns}
+        data={table.data.map((row) => ({
+          ...row,
+          loanDate: new Date(row.loanDate).toLocaleDateString('vi-VN'),
+          returnDate: row.returnDate ? new Date(row.returnDate).toLocaleDateString('vi-VN') : 'Chưa trả',
+        }))}
+        page={table.page}
+        rowsPerPage={table.rowsPerPage}
+        onPageChange={table.handleChangePage}
+        onRowsPerPageChange={table.handleChangeRowsPerPage}
+      />
+      {error && <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>}
     </Box>
   );
 };

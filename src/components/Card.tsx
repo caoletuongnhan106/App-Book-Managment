@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card, CardContent, CardMedia, Typography, CardActions,
   Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField
@@ -19,10 +19,22 @@ interface CardProps {
 const CardComponent: React.FC<CardProps> = ({ book }) => {
   const isAdmin = useCheckRole('admin');
   const { open, close, dialogProps } = useDialog();
-  const { handleBorrow, handleReturn, loans } = useLoanManagement();
+  const { handleBorrow, handleReturn, loans, loading } = useLoanManagement();
   const [openBorrowDialog, setOpenBorrowDialog] = useState(false);
   const [returnDate, setReturnDate] = useState('');
-  const loan = Array.isArray(loans) ? loans.find((l) => l.bookId === book.id) : undefined;
+
+  const [loanId, setLoanId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const matchingLoan = loans.find(
+      (l) => l.bookId === book.id && !l.returnDate
+    );
+    if (matchingLoan) {
+      setLoanId(matchingLoan.id);
+    } else {
+      setLoanId(null);
+    }
+  }, [loans, book.id]);
 
   const handleOpenEditDialog = () => {
     open(
@@ -46,15 +58,15 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
     setOpenBorrowDialog(true);
   };
 
-  const confirmBorrow = () => {
-    if (!book.id || typeof book.id !== 'string' || book.id.trim() === '') return;
-    handleBorrow(book.id, book.title, returnDate);
+  const confirmBorrow = async () => {
+    if (!book.id || typeof book.id !== 'string') return;
+    await handleBorrow(book.id, book.title, returnDate);
     setOpenBorrowDialog(false);
   };
 
-  const handleReturnClick = () => {
-    if (loan) {
-      handleReturn(loan.id);
+  const handleReturnClick = async () => {
+    if (loanId !== null) {
+      await handleReturn(loanId);
     }
   };
 
@@ -74,8 +86,22 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
         <CardActions>
           {!isAdmin ? (
             <>
-              <Button size="small" variant="contained" onClick={handleBorrowClick} disabled={Boolean(loan) || book.quantity <= 0}>MƯỢN SÁCH</Button>
-              <Button size="small" variant="outlined" onClick={handleReturnClick} disabled={!loan}>TRẢ SÁCH</Button>
+              <Button
+                size="small"
+                variant="contained"
+                onClick={handleBorrowClick}
+                disabled={!!loanId || book.quantity <= 0 || loading}
+              >
+                MƯỢN SÁCH
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={handleReturnClick}
+                disabled={loanId === null || loading}
+              >
+                TRẢ SÁCH
+              </Button>
             </>
           ) : (
             <>
@@ -89,7 +115,6 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
       <CustomDialog {...dialogProps} onClose={close}>
         {dialogProps.content}
       </CustomDialog>
-
 
       <Dialog open={openBorrowDialog} onClose={() => setOpenBorrowDialog(false)}>
         <DialogTitle>Xác nhận mượn sách</DialogTitle>

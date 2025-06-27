@@ -1,18 +1,16 @@
-import React, { useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { useLoanManagement } from '../hooks/useLoanManagement';
+import { useEffect, useState } from 'react';
+import { Typography, Button } from '@mui/material';
 import CustomTable from '../components/CustomTable';
-import { useTable } from '../hooks/useTable';
+import { useLoanManagement } from '../hooks/useLoanManagement';
 
 const UserLoans: React.FC = () => {
-  const navigate = useNavigate();
-  const { loans, handleReturn, loading, error } = useLoanManagement();
-  const table = useTable({ initialData: loans });
+  const { loans, handleReturn, loading, fetchLoans } = useLoanManagement();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   useEffect(() => {
-    table.updateData(loans);
-  }, [loans]);
+    fetchLoans();
+  }, [fetchLoans]);
 
   const columns = [
     { id: 'id', label: 'ID' },
@@ -20,49 +18,49 @@ const UserLoans: React.FC = () => {
     { id: 'loanDate', label: 'Ngày mượn' },
     { id: 'returnDate', label: 'Ngày trả' },
     {
-      id: 'actions',
+      id: 'status',
+      label: 'Trạng thái',
+      render: (_: any, row: any) =>
+        row.returnDate ? (
+          <span style={{ color: 'gray' }}>Đã trả</span>
+        ) : (
+          <span style={{ color: 'green', fontWeight: 'bold' }}>Đang mượn</span>
+        ),
+    },
+    {
+      id: 'action',
       label: 'Hành động',
-      render: (row: any) => (
-        <Button
-          size="small"
-          variant="outlined"
-          disabled={Boolean(row.returnDate) || loading}
-          onClick={() => handleReturn(row.id)}
-        >
-          Trả sách
-        </Button>
-      ),
+      render: (_: any, row: any) =>
+        row.returnDate ? (
+          <Typography variant="body2" color="textSecondary">Đã trả</Typography>
+        ) : (
+          <Button
+            variant="contained"
+            size="small"
+            color="primary"
+            onClick={() => handleReturn(row.id)}
+          >
+            Trả sách
+          </Button>
+        ),
     },
   ];
 
-  const formattedData = table.data
-    .filter((row) => row && typeof row === 'object') 
-    .map((row) => {
-      const loanDate = row.loanDate
-        ? new Date(row.loanDate).toLocaleDateString('vi-VN')
-        : 'Không rõ';
-
-      const returnDate = row.returnDate
-        ? new Date(row.returnDate).toLocaleDateString('vi-VN')
-        : 'Chưa trả';
-
-      return { ...row, loanDate, returnDate };
-    });
-
   return (
-    <Box sx={{ p: 3 }}>
-      <Button onClick={() => navigate('/')} sx={{ mb: 2 }}>Back</Button>
-      <Typography variant="h5" gutterBottom>Quản lý mượn/trả sách</Typography>
-      {error && <Typography color="error">{error}</Typography>}
+    <div>
+      <Typography variant="h6" gutterBottom>
+        Quản lý mượn/trả sách
+      </Typography>
       <CustomTable
         columns={columns}
-        data={formattedData}
-        page={table.page}
-        rowsPerPage={table.rowsPerPage}
-        onPageChange={table.handleChangePage}
-        onRowsPerPageChange={table.handleChangeRowsPerPage}
+        data={loans}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onPageChange={(newPage) => setPage(newPage)}
+        onRowsPerPageChange={(newRows) => setRowsPerPage(newRows)}
+        loading={loading}
       />
-    </Box>
+    </div>
   );
 };
 
