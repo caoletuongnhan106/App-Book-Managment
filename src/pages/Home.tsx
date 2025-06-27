@@ -3,12 +3,14 @@ import { useAuth } from '../context/AuthContext';
 import { useBookContext } from '../context/BookContext';
 import AddBookForm from '../components/AddBookForm';
 import CardComponent from '../components/Card';
-import { Container, Box, Typography, Button } from '@mui/material';
+import { Container, Box, Typography, Button, Stack } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import React from 'react';
 
 const Home: React.FC = () => {
   const { user, logout } = useAuth();
   const { state } = useBookContext();
+  const navigate = useNavigate();
   const books = state.books;
 
   const bookList = useMemo(() => {
@@ -19,17 +21,41 @@ const Home: React.FC = () => {
     logout();
   };
 
+  const goToLoanPage = () => {
+    if (user?.role === 'admin') {
+      navigate('/admin/loans');
+    } else if (user?.role === 'user') {
+      navigate('/user/loans');
+    }
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 3, backgroundColor: 'background.default', p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <Button variant="contained" color="secondary" onClick={handleLogout}>
-          Logout
-        </Button>
-      </Box>
+      <Stack direction="row" justifyContent="space-between" sx={{ mb: 2 }}>
+        <Typography variant="h6" color="text.primary">
+          Xin chào, {user?.email}
+        </Typography>
+        <Box>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={goToLoanPage}
+            sx={{ mr: 2 }}
+          >
+            {user?.role === 'admin' ? 'Quản lý mượn sách' : 'Mượn / Trả sách'}
+          </Button>
+          <Button variant="contained" color="secondary" onClick={handleLogout}>
+            Logout
+          </Button>
+        </Box>
+      </Stack>
+
       <Typography variant="h4" align="center" color="primary" gutterBottom>
         Library Management System
       </Typography>
+
       {user?.role === 'admin' && <AddBookForm />}
+
       <Box
         sx={{
           display: 'flex',

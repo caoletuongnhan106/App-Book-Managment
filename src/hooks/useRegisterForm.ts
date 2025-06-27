@@ -15,53 +15,49 @@ interface RegisterFormData {
 interface UseRegisterFormReturn {
   handleSubmit: () => Promise<void>;
   snackbarProps: ReturnType<typeof useSnackbar>['snackbarProps'];
+  registerSchema: yup.ObjectSchema<RegisterFormData>;
+  formMethods: ReturnType<typeof useForm<RegisterFormData>>;
 }
 
 export const useRegisterForm = (): UseRegisterFormReturn => {
-  const { register } = useAuth();
+  const { register: authRegister } = useAuth();
   const navigate = useNavigate();
   const { showMessage, snackbarProps } = useSnackbar();
 
-  const registerSchema = useMemo(() =>
-    yup.object({
-      email: yup.string().email('Invalid email').required('Email is required'),
-      password: yup
-        .string()
-        .required('Password is required')
-        .min(6, 'Password must be at least 6 characters'),
-      confirmPassword: yup
-        .string()
-        .oneOf([yup.ref('password')], 'Passwords must match')
-        .required('Confirm password is required'),
-    }),
+  const registerSchema = useMemo(
+    () =>
+      yup.object({
+        email: yup.string().email('Invalid email format').required('Email is required'),
+        password: yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
+        confirmPassword: yup
+          .string()
+          .oneOf([yup.ref('password')], 'Passwords must match')
+          .required('Confirm password is required'),
+      }),
     []
   );
 
   const formMethods = useForm<RegisterFormData>({
     defaultValues: { email: '', password: '', confirmPassword: '' },
     resolver: yupResolver(registerSchema),
+    mode: 'onChange',
   });
 
   const handleSubmit = useCallback(async () => {
     const isValid = await formMethods.trigger();
-
     if (isValid) {
       const data = formMethods.getValues();
-      const cleanedData = {
-        email: data.email,
-        password: data.password,
-        confirmPassword: data.confirmPassword,
-      };
-      const result = await register(cleanedData.email, cleanedData.password);
-
+      const result = await authRegister(data.email, data.password);
       if (result.success) {
         showMessage('Đăng ký thành công!', 'success');
         navigate('/login');
       } else {
-        showMessage(result.error || 'Đăng ký không thành công!', 'error');
+        showMessage(result.error || 'Đăng ký thất bại!', 'error');
       }
+    } else {
+      showMessage('Vui lòng kiểm tra lại các trường nhập liệu!', 'error');
     }
-  }, [formMethods, register, showMessage, navigate]);
+  }, [formMethods, authRegister, showMessage, navigate]);
 
-  return { handleSubmit, snackbarProps };
+  return { handleSubmit, snackbarProps, registerSchema, formMethods };
 };
