@@ -31,9 +31,7 @@ export const borrowBook = async (
   bookId: string,
   bookTitle: string,
   userName: string,
-  _returnDate?: string 
 ): Promise<Loan> => {
-  if (!bookId) throw new Error('bookId không hợp lệ');
   const loan: Loan = {
     id: Date.now(),
     userId,

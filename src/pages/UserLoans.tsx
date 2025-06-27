@@ -1,12 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Typography, Button } from '@mui/material';
+import { Typography, Button, Box } from '@mui/material';
 import CustomTable from '../components/CustomTable';
+import { useNavigate } from 'react-router-dom';
 import { useLoanManagement } from '../hooks/useLoanManagement';
 
 const UserLoans: React.FC = () => {
   const { loans, handleReturn, loading, fetchLoans } = useLoanManagement();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const navigate = useNavigate();
+
+const handleBack = () => {
+  navigate(-1); 
+};
+
 
   useEffect(() => {
     fetchLoans();
@@ -47,7 +54,8 @@ const UserLoans: React.FC = () => {
   ];
 
   return (
-    <div>
+    <Box sx={{ p: 3 }}>
+      <Button variant="outlined" onClick={handleBack} sx={{ mb: 2 }}>BACK</Button>
       <Typography variant="h6" gutterBottom>
         Quản lý mượn/trả sách
       </Typography>
@@ -60,7 +68,7 @@ const UserLoans: React.FC = () => {
         onRowsPerPageChange={(newRows) => setRowsPerPage(newRows)}
         loading={loading}
       />
-    </div>
+    </Box>
   );
 };
 

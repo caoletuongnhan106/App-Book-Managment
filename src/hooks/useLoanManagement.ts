@@ -70,11 +70,11 @@ export const useLoanManagement = ({
   }, [books, loans]);
 
   const handleBorrow = useCallback(
-    async (bookId: string, bookTitle: string, returnDate?: string) => {
+    async (bookId: string, bookTitle: string) => {
       if (userId == null) return;
       setLoading(true);
       try {
-        await borrowBook(userId, bookId, bookTitle, userName, returnDate);
+        await borrowBook(userId, bookId, bookTitle, userName);
         await fetchLoans(); 
         setError(null);
       } catch (err: any) {
