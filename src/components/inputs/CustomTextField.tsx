@@ -1,13 +1,11 @@
-import { Controller } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { TextField, type TextFieldProps } from '@mui/material';
-import { useFormContext } from 'react-hook-form';
 
 interface CustomTextFieldProps extends Omit<TextFieldProps, 'onChange' | 'onBlur' | 'value'> {
   name: string;
   label: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onBlur?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  transform?: (value: string) => string;
 }
 
 const CustomTextField: React.FC<CustomTextFieldProps> = ({
@@ -16,38 +14,41 @@ const CustomTextField: React.FC<CustomTextFieldProps> = ({
   type = 'text',
   onChange: propOnChange,
   onBlur: propOnBlur,
-  transform = (value) => value?.trim() || '',
   ...rest
 }) => {
-  const { control } = useFormContext(); 
+  const { control } = useFormContext();
 
   return (
     <Controller
       name={name}
-      control={control} 
+      control={control}
       defaultValue=""
-      render={({ field, fieldState }) => (
-        <TextField
-          fullWidth
-          label={label}
-          type={type}
-          value={field.value}
-          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-            const rawValue = e.target.value;
-            const transformedValue = transform(rawValue);
-            field.onChange(transformedValue);
-            if (propOnChange) propOnChange(e);
-          }}
-          onBlur={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-            field.onBlur();
-            if (propOnBlur) propOnBlur(e);
-          }}
-          error={!!fieldState.error}
-          helperText={fieldState.error?.message || ''}
-          variant="outlined"
-          {...rest}
-        />
-      )}
+      rules={{ required: true }} 
+      render={({ field, fieldState }) => {
+        console.log(`Field ${name} value:`, field.value); 
+        console.log(`Field ${name} state:`, fieldState); 
+        return (
+          <TextField
+            fullWidth
+            label={label}
+            type={type}
+            value={field.value ?? ''} 
+            onChange={(e) => {
+              const value = e.target.value;
+              field.onChange(value); 
+              if (propOnChange) propOnChange(e);
+            }}
+            onBlur={(e) => {
+              field.onBlur();
+              if (propOnBlur) propOnBlur(e);
+            }}
+            error={!!fieldState.error}
+            helperText={fieldState.error?.message || ''}
+            variant="outlined"
+            {...rest}
+          />
+        );
+      }}
     />
   );
 };
