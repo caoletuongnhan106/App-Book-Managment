@@ -1,23 +1,33 @@
-import { useEffect, useState } from 'react';
-import { Typography, Button, Box } from '@mui/material';
-import CustomTable from '../components/CustomTable';
+import { Box, Typography, Button, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useLoanManagement } from '../hooks/useLoanManagement';
+import { useEffect } from 'react';
+import LoanTable from '../components/LoanTable';
+import { useTable } from '../hooks/useTable';
+import { useSearchFilter } from '../hooks/useSearchFilter';
+import { getLoansByUser } from '../api/loans';
 
 const UserLoans: React.FC = () => {
-  const { loans, handleReturn, loading, fetchLoans } = useLoanManagement();
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const userId = user?.id ? Number(user.id) : 0;
+  const { loans, handleReturn, loading, fetchLoans } = useLoanManagement();
+  const userLoans = loans.filter((loan) => loan.userId === userId);
+  const { searchTerm, setSearchTerm, filteredData } = useSearchFilter(userLoans, ['bookTitle']);
 
-const handleBack = () => {
-  navigate(-1); 
-};
-
+  const fetchApiFn = () => getLoansByUser(userId);
+  const table = useTable({ initialData: userLoans, fetchApiFn, filteredData });
 
   useEffect(() => {
     fetchLoans();
   }, [fetchLoans]);
+
+  useEffect(() => {
+    table.updateData(filteredData);
+  }, [filteredData]);
+
+  const handleBack = () => navigate(-1);
 
   const columns = [
     { id: 'id', label: 'ID' },
@@ -46,6 +56,7 @@ const handleBack = () => {
             size="small"
             color="primary"
             onClick={() => handleReturn(row.id)}
+            disabled={loading}
           >
             Trả sách
           </Button>
@@ -56,17 +67,24 @@ const handleBack = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Button variant="outlined" onClick={handleBack} sx={{ mb: 2 }}>BACK</Button>
-      <Typography variant="h6" gutterBottom>
-        Quản lý mượn/trả sách
-      </Typography>
-      <CustomTable
+      <Typography variant="h6" gutterBottom>Quản lý mượn/trả sách</Typography>
+      <TextField
+        label="Tìm kiếm (Tiêu đề sách)"
+        variant="outlined"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        sx={{ mb: 2, width: '100%', maxWidth: 400 }}
+      />
+      <LoanTable
+        loans={table.data}
         columns={columns}
-        data={loans}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={(newPage) => setPage(newPage)}
-        onRowsPerPageChange={(newRows) => setRowsPerPage(newRows)}
-        loading={loading}
+        onReturn={handleReturn}
+        loading={loading || table.loading}
+        page={table.page}
+        rowsPerPage={table.rowsPerPage}
+        total={table.total}
+        onPageChange={table.handleChangePage}
+        onRowsPerPageChange={table.handleChangeRowsPerPage}
       />
     </Box>
   );

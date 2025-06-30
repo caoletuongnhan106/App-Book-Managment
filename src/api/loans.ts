@@ -21,7 +21,7 @@ const getRandomLoanDate = () => {
 
 export const getLoansByUser = async (userId: number, isAdmin?: boolean): Promise<Loan[]> => {
   if (isAdmin) {
-    return mockLoans;
+    return [...mockLoans];
   }
   return mockLoans.filter((loan) => loan.userId === userId);
 };
@@ -32,10 +32,12 @@ export const borrowBook = async (
   bookTitle: string,
   userName: string,
 ): Promise<Loan> => {
+  const existingLoan = mockLoans.find((loan) => loan.bookId === bookId && !loan.returnDate);
+  if (existingLoan) throw new Error('Sách đã được mượn');
   const loan: Loan = {
     id: Date.now(),
     userId,
-    userName, 
+    userName,
     bookId,
     bookTitle,
     loanDate: new Date().toISOString().split('T')[0],
@@ -45,9 +47,12 @@ export const borrowBook = async (
 };
 
 export const returnBook = async (loanId: number): Promise<void> => {
-  mockLoans = mockLoans.map((loan) =>
-    loan.id === loanId ? { ...loan, returnDate: new Date().toISOString().split('T')[0] } : loan
-  );
+  const loanIndex = mockLoans.findIndex((loan) => loan.id === loanId);
+  if (loanIndex !== -1 && !mockLoans[loanIndex].returnDate) {
+    mockLoans[loanIndex] = { ...mockLoans[loanIndex], returnDate: new Date().toISOString().split('T')[0] };
+  } else if (loanIndex !== -1) {
+    throw new Error('Sách đã được trả');
+  } else {
+    throw new Error('Không tìm thấy loan');
+  }
 };
-
-
