@@ -1,22 +1,27 @@
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useLoanManagement } from '../hooks/useLoanManagement';
 import { useEffect } from 'react';
-import CustomTable from '../components/CustomTable';
+import LoanTable from '../components/LoanTable';
 import { useTable } from '../hooks/useTable';
+import { useSearchFilter } from '../hooks/useSearchFilter';
+import { getLoansByUser } from '../api/loans';
 
 const AdminLoans: React.FC = () => {
   const { loans, loading, error, fetchLoans } = useLoanManagement({ isAdmin: true });
   const navigate = useNavigate();
-  const table = useTable({ initialData: loans });
+  const { searchTerm, setSearchTerm, filteredData } = useSearchFilter(loans, ['bookTitle', 'userName']);
+
+  const fetchApiFn = () => getLoansByUser(0, true);
+  const table = useTable({ initialData: loans, fetchApiFn, isAdmin: true, filteredData });
 
   useEffect(() => {
     fetchLoans();
   }, [fetchLoans]);
 
   useEffect(() => {
-    table.updateData(loans);
-  }, [loans]);
+    table.updateData(filteredData);
+  }, [filteredData]);
 
   const handleBack = () => navigate('/');
 
@@ -32,20 +37,24 @@ const AdminLoans: React.FC = () => {
     <Box sx={{ p: 3 }}>
       <Button variant="outlined" onClick={handleBack} sx={{ mb: 2 }}>BACK</Button>
       <Typography variant="h5" gutterBottom>Quản lý mượn/trả sách (Admin)</Typography>
-      <CustomTable
-        loading={loading}
+      <TextField
+        label="Tìm kiếm (Tiêu đề sách hoặc Tên người mượn)"
+        variant="outlined"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        sx={{ mb: 2, width: '100%', maxWidth: 400 }}
+      />
+      <LoanTable
+        loans={table.data}
         columns={columns}
-        data={table.data.map((row) => ({
-          ...row,
-          loanDate: new Date(row.loanDate).toLocaleDateString('vi-VN'),
-          returnDate: row.returnDate ? new Date(row.returnDate).toLocaleDateString('vi-VN') : 'Chưa trả',
-        }))}
+        loading={loading || table.loading}
+        error={error || table.error}
         page={table.page}
         rowsPerPage={table.rowsPerPage}
+        total={table.total}
         onPageChange={table.handleChangePage}
         onRowsPerPageChange={table.handleChangeRowsPerPage}
       />
-      {error && <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>}
     </Box>
   );
 };
