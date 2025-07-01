@@ -1,47 +1,41 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
+import { Container, Box, Typography, Button, Stack, TextField } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useBookContext } from '../context/BookContext';
 import AddBookForm from '../components/AddBookForm';
 import CardComponent from '../components/Card';
-import { Container, Box, Typography, Button, Stack } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import React from 'react';
+import { useSearchFilter } from '../hooks/useSearchFilter'; 
 
 const Home: React.FC = () => {
   const { user, logout } = useAuth();
   const { state } = useBookContext();
   const navigate = useNavigate();
-  const books = state.books;
+  const books = state.books || [];
+
+  const { searchTerm, setSearchTerm, filteredData } = useSearchFilter(books, [
+    'title',
+    'author',
+    'category',
+  ]);
 
   const bookList = useMemo(() => {
-    return books ? books.map((book) => <CardComponent key={book.id} book={book} />) : [];
-  }, [books]);
+    return filteredData.map((book) => <CardComponent key={book.id} book={book} />);
+  }, [filteredData]);
 
-  const handleLogout = () => {
-    logout();
-  };
+  const handleLogout = () => logout();
 
   const goToLoanPage = () => {
-    if (user?.role === 'admin') {
-      navigate('/admin/loans');
-    } else if (user?.role === 'user') {
-      navigate('/user/loans');
-    }
+    if (user?.role === 'admin') navigate('/admin/loans');
+    else if (user?.role === 'user') navigate('/user/loans');
   };
 
   return (
     <Container maxWidth="lg" sx={{ mt: 3, backgroundColor: 'background.default', p: 2 }}>
       <Stack direction="row" justifyContent="space-between" sx={{ mb: 2 }}>
-        <Typography variant="h6" color="text.primary">
-          Xin chào, {user?.email}
-        </Typography>
+        <Typography variant="h6">Xin chào, {user?.email}</Typography>
         <Box>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={goToLoanPage}
-            sx={{ mr: 2 }}
-          >
+          <Button variant="contained" color="primary" onClick={goToLoanPage} sx={{ mr: 2 }}>
             {user?.role === 'admin' ? 'Quản lý mượn sách' : 'Mượn / Trả sách'}
           </Button>
           <Button variant="contained" color="secondary" onClick={handleLogout}>
@@ -56,17 +50,19 @@ const Home: React.FC = () => {
 
       {user?.role === 'admin' && <AddBookForm />}
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          mt: 3,
-          gap: 2,
-        }}
-      >
-        {books && books.length === 0 ? (
+      <TextField
+        label="Tìm kiếm sách (Tiêu đề, Tác giả, Thể loại)"
+        variant="outlined"
+        fullWidth
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        sx={{ my: 3 }}
+      />
+
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+        {filteredData.length === 0 ? (
           <Typography align="center" sx={{ width: '100%', color: 'text.secondary' }}>
-            No books available.
+            Không tìm thấy sách phù hợp.
           </Typography>
         ) : (
           bookList
