@@ -46,7 +46,7 @@ const LoanTable: React.FC<LoanTableProps> = ({
           <Button
             size="small"
             variant="outlined"
-            disabled={(row.returnDate !== null && row.returnDate !== undefined && row.returnDate !== '') || loading}
+            disabled={Boolean(row.returnDate) || loading}
             onClick={() => onReturn?.(row.id)}
           >
             Trả sách
