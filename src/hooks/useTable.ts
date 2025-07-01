@@ -85,11 +85,11 @@ export const useTable = ({
 
   return {
     ...tableState,
-    loading,
-    error,
-    handleChangePage,
-    handleChangeRowsPerPage,
-    updateData,
-    fetchData,
+  loading,
+  error,
+  onPageChange: handleChangePage,
+  onRowsPerPageChange: handleChangeRowsPerPage,
+  updateData,
+  fetchData,
   };
 };

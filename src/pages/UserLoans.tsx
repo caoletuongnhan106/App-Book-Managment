@@ -63,7 +63,14 @@ const UserLoans: React.FC = () => {
         ),
     },
   ];
-
+  
+  const tableProps = {
+    ...table,
+    loading: loading || table.loading,
+    onReturn: handleReturn,
+  };
+  
+  
   return (
     <Box sx={{ p: 3 }}>
       <Button variant="outlined" onClick={handleBack} sx={{ mb: 2 }}>BACK</Button>
@@ -76,16 +83,10 @@ const UserLoans: React.FC = () => {
         sx={{ mb: 2, width: '100%', maxWidth: 400 }}
       />
       <LoanTable
+        {...table}
         loans={table.data}
-        columns={columns}
         onReturn={handleReturn}
-        loading={loading || table.loading}
-        page={table.page}
-        rowsPerPage={table.rowsPerPage}
-        total={table.total}
-        onPageChange={table.handleChangePage}
-        onRowsPerPageChange={table.handleChangeRowsPerPage}
-      />
+        loading={loading || table.loading}/>
     </Box>
   );
 };
