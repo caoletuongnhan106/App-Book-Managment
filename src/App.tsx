@@ -7,8 +7,9 @@ import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import AdminLoans from './pages/AdminLoans';
 import UserLoans from './pages/UserLoans';
+import Profile from './pages/Profile';
 import { CssBaseline } from '@mui/material';
-import {type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
 const ProtectedRoute = () => {
   const { user } = useAuth();
@@ -67,6 +68,10 @@ const router = createBrowserRouter([
             <UserLoans />
           </RoleBasedRoute>
         ),
+      },
+      {
+        path: '/profile',
+        element: <Profile />, 
       },
     ],
   },
