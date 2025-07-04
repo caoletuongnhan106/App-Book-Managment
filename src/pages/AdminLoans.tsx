@@ -19,7 +19,7 @@ const StyledContainer = styled(Box)(({ theme }) => ({
   overflow: 'hidden',
 }));
 
-const StyledOverlay = styled(Box)(({ theme }) => ({
+const StyledOverlay = styled(Box)(({ }) => ({
   position: 'absolute',
   top: 0,
   left: 0,
@@ -44,7 +44,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
+const StyledTextField = styled(TextField)(({ }) => ({
   '& .MuiOutlinedInput-root': {
     borderRadius: '10px',
     '& fieldset': {
@@ -73,14 +73,6 @@ const AdminLoans: React.FC = () => {
   }, [filteredData]);
 
   const handleBack = () => navigate('/');
-
-  const columns = [
-    { id: 'id', label: 'ID Mượn' },
-    { id: 'userName', label: 'Tên Người Mượn' },
-    { id: 'bookTitle', label: 'Tiêu đề Sách' },
-    { id: 'loanDate', label: 'Ngày Mượn' },
-    { id: 'returnDate', label: 'Ngày Trả' },
-  ];
 
   return (
     <StyledContainer>

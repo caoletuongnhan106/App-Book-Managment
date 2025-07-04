@@ -20,7 +20,7 @@ const StyledContainer = styled(Box)(({ theme }) => ({
   overflow: 'hidden',
 }));
 
-const StyledOverlay = styled(Box)(({ theme }) => ({
+const StyledOverlay = styled(Box)(({  }) => ({
   position: 'absolute',
   top: 0,
   left: 0,
@@ -45,7 +45,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
+const StyledTextField = styled(TextField)(({  }) => ({
   '& .MuiOutlinedInput-root': {
     borderRadius: '10px',
     '& fieldset': {

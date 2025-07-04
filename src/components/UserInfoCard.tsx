@@ -28,7 +28,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-const StyledAvatar = styled(Avatar)(({ theme }) => ({
+const StyledAvatar = styled(Avatar)(({}) => ({
   width: 100,
   height: 100,
   fontSize: 36,

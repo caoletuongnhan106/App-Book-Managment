@@ -25,7 +25,7 @@ const StyledContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const StyledOverlay = styled(Box)(({ theme }) => ({
+const StyledOverlay = styled(Box)(({  }) => ({
   position: 'absolute',
   top: 0,
   left: 0,
@@ -35,7 +35,7 @@ const StyledOverlay = styled(Box)(({ theme }) => ({
   zIndex: 0,
 }));
 
-const StyledAvatar = styled(Avatar)(({ theme }) => ({
+const StyledAvatar = styled(Avatar)(({  }) => ({
   width: 120,
   height: 120,
   transition: 'transform 0.3s ease-in-out',
@@ -58,7 +58,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const StyledCard = styled(Card)(({ theme }) => ({
+const StyledCard = styled(Card)(({  }) => ({
   mt: 4,
   borderRadius: '16px',
   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
@@ -67,7 +67,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
+const StyledTextField = styled(TextField)(({  }) => ({
   '& .MuiOutlinedInput-root': {
     borderRadius: '10px',
     '& fieldset': {
