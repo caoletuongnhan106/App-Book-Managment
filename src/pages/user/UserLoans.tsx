@@ -1,12 +1,12 @@
 import { Box, Typography, Button, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useLoanManagement } from '../hooks/useLoanManagement';
+import { useAuth } from '../../context/AuthContext';
+import { useLoanManagement } from '../../hooks/useLoanManagement';
 import { useEffect } from 'react';
-import LoanTable from '../components/LoanTable';
-import { useTable } from '../hooks/useTable';
-import { useSearchFilter } from '../hooks/useSearchFilter';
-import { getLoansByUser } from '../api/loans';
+import LoanTable from '../../components/LoanTable';
+import { useTable } from '../../hooks/useTable';
+import { useSearchFilter } from '../../hooks/useSearchFilter';
+import { getLoansByUser } from '../../api/loans';
 import { styled } from '@mui/material/styles';
 
 const StyledContainer = styled(Box)(({ theme }) => ({
