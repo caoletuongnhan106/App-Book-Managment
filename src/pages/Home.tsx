@@ -137,6 +137,11 @@ const Home: React.FC = () => {
             Xin chào, {user?.email}
           </Typography>
           <Stack direction="row" spacing={2}>
+          {user?.role === 'admin' && (
+          <StyledButton variant="contained" onClick={() => navigate('/admin')}>
+            DashBoard
+          </StyledButton>
+          )}
             <StyledButton variant="contained" onClick={handleLoanPage}>
               {user?.role === 'admin' ? 'Quản lý mượn sách' : 'Mượn / Trả sách'}
             </StyledButton>

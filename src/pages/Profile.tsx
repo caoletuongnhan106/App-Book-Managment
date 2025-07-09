@@ -49,22 +49,22 @@ const StyledAvatar = styled(Avatar)(({ }) => ({
 }));
 
 const StyledUploadButton = styled(Button)(({ theme }) => ({
-  borderRadius: '6px', // Bo góc mềm mại như Antd
-  padding: theme.spacing(1, 4), // Padding cân đối
+  borderRadius: '6px', 
+  padding: theme.spacing(1, 4),
   textTransform: 'none',
-  fontWeight: 500, // Font đậm vừa phải
-  height: '32px', // Chiều cao cố định như Antd
-  backgroundColor: '#1890ff', // Màu chính của Antd
+  fontWeight: 500, 
+  height: '32px', 
+  backgroundColor: '#1890ff', 
   color: '#fff',
-  boxShadow: '0 2px 0 rgba(0, 0, 0, 0.02)', // Shadow nhẹ
-  transition: 'all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)', // Hiệu ứng mượt mà
+  boxShadow: '0 2px 0 rgba(0, 0, 0, 0.02)', 
+  transition: 'all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)', 
   '&:hover': {
-    backgroundColor: '#40a9ff', // Màu hover sáng hơn
-    boxShadow: '0 4px 6px rgba(24, 144, 255, 0.2)', // Shadow khi hover
-    transform: 'translateY(-1px)', // Nhẹ nhàng nâng lên
+    backgroundColor: '#40a9ff',
+    boxShadow: '0 4px 6px rgba(24, 144, 255, 0.2)', 
+    transform: 'translateY(-1px)',
   },
   '&:active': {
-    transform: 'translateY(0)', // Reset khi nhấn
+    transform: 'translateY(0)', 
   },
 }));
 

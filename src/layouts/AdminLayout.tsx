@@ -1,28 +1,32 @@
-import React from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import {
   Box,
   CssBaseline,
   Drawer,
   List,
-  ListSubheader,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
   Toolbar,
   AppBar,
   Typography,
   IconButton,
+  useTheme,
+  useMediaQuery,
+  Slide
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import CloseIcon from '@mui/icons-material/Close';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import GroupIcon from '@mui/icons-material/Group';
-import { useAuth } from '../context/AuthContext'; 
-import { useSidebar } from '../hooks/useSidebar'; 
-import MenuItem from '../components/MenuItem'; 
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
+import HomeIcon from '@mui/icons-material/Home';
 
 const drawerWidth = 240;
 
 const menuItems = [
+  { text: 'Home', icon: <HomeIcon />, path: '/' },
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/admin/dashboard' },
   { text: 'Books', icon: <MenuBookIcon />, path: '/admin/books' },
   { text: 'Users', icon: <GroupIcon />, path: '/admin/users' },
@@ -30,98 +34,133 @@ const menuItems = [
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
-  const { isMobile, open, toggleDrawer, setOpen } = useSidebar();
-  const { user } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [open, setOpen] = useState(false);
 
-  const drawerContent = React.useMemo(() => (
-    <>
-      <Toolbar sx={{ justifyContent: 'space-between', minHeight: '64px' }}>
-        <Typography variant="h6" sx={{ color: '#fff' }}>
-          Menu
-        </Typography>
+  const toggleDrawer = () => {
+    setOpen(prev => !prev);
+  };
+
+  const drawer = (
+    <Box
+      sx={{
+        width: drawerWidth,
+        backgroundColor: '#1e1e2f',
+        height: '100%',
+        color: 'white',
+        p: 2,
+      }}
+    >
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h6">Admin Menu</Typography>
         {isMobile && (
-          <IconButton onClick={toggleDrawer} sx={{ color: '#fff' }}>
+          <IconButton onClick={toggleDrawer} sx={{ color: 'white' }}>
             <CloseIcon />
           </IconButton>
         )}
-      </Toolbar>
-      <List
-        subheader={
-          <ListSubheader
-            component="div"
-            sx={{ backgroundColor: '#1e1e2f', color: '#ffffff', fontWeight: 'bold' }}
-          >
-            Main Menu
-          </ListSubheader>
-        }
-      >
-        {menuItems.map((item) => (
-          <MenuItem
-            key={item.text}
-            text={item.text}
-            icon={item.icon}
-            path={item.path}
-            onClick={() => isMobile && setOpen(false)}
-          />
-        ))}
+      </Box>
+      <List>
+        {menuItems.map(item => {
+          const isActive = location.pathname === item.path;
+          return (
+            <NavLink
+              to={item.path}
+              key={item.text}
+              style={{ textDecoration: 'none' }}
+              onClick={() => isMobile && setOpen(false)}
+            >
+              <ListItemButton
+                selected={isActive}
+                sx={{
+                  borderRadius: 1,
+                  mb: 1,
+                  backgroundColor: isActive ? '#2c2c44' : 'transparent',
+                  '&:hover': {
+                    backgroundColor: '#2c2c44',
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ color: isActive ? '#90caf9' : '#bbb' }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.text}
+                  primaryTypographyProps={{
+                    color: isActive ? '#90caf9' : '#bbb',
+                    fontWeight: isActive ? 'bold' : 'normal',
+                  }}
+                />
+              </ListItemButton>
+            </NavLink>
+          );
+        })}
       </List>
-    </>
-  ), [isMobile, toggleDrawer, setOpen]);
+    </Box>
+  );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar
-        position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: '#1976d2' }}
-      >
+      <AppBar position="fixed" sx={{ zIndex: theme.zIndex.drawer + 1 }}>
         <Toolbar>
-          {isMobile && (
-            <IconButton color="inherit" edge="start" onClick={toggleDrawer} sx={{ mr: 2 }}>
-              <MenuIcon />
-            </IconButton>
-          )}
-          <Typography variant="h6" noWrap component="div">
-            Library Management System
+          <IconButton color="inherit" edge="start" onClick={toggleDrawer} sx={{ mr: 2 }}>
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap>
+            Library Management System - Admin
           </Typography>
         </Toolbar>
       </AppBar>
-
-      <Drawer
-        variant={isMobile ? 'temporary' : 'permanent'}
-        open={isMobile ? open : true}
-        onClose={isMobile ? toggleDrawer : undefined}
-        ModalProps={isMobile ? { keepMounted: true } : undefined}
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
+      {!isMobile && (
+        <Drawer
+          variant="permanent"
+          sx={{
             width: drawerWidth,
-            boxSizing: 'border-box',
-            backgroundColor: '#1e1e2f',
-            color: '#fff',
-            borderRight: 'none',
-            display: 'block',
-          },
-        }}
-      >
-        {drawerContent}
-      </Drawer>
+            flexShrink: 0,
+            [`& .MuiDrawer-paper`]: {
+              width: drawerWidth,
+              boxSizing: 'border-box',
+              backgroundColor: '#1e1e2f',
+              color: '#fff',
+            },
+          }}
+        >
+          {drawer}
+        </Drawer>
+      )}
 
+      {/* Drawer for Mobile with Slide transition */}
+      {isMobile && (
+        <Slide direction="right" in={open} mountOnEnter unmountOnExit>
+          <Drawer
+            variant="temporary"
+            open={open}
+            onClose={toggleDrawer}
+            sx={{
+              [`& .MuiDrawer-paper`]: {
+                width: drawerWidth,
+                backgroundColor: '#1e1e2f',
+                color: '#fff',
+              },
+            }}
+          >
+            {drawer}
+          </Drawer>
+        </Slide>
+      )}
+
+      {/* Main Content */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          backgroundColor: '#f5f5f5',
-          minHeight: '100vh',
           p: 3,
-          marginLeft: isMobile ? 0 : `${drawerWidth}px`,
-          transition: 'margin-left 0.3s ease',
+          mt: 8,
+          minHeight: '100vh',
+          backgroundColor: '#f5f5f5',
         }}
       >
-        <Toolbar />
-        <div>Current Path: {location.pathname}</div>
-        <div>User: {user ? JSON.stringify(user) : 'Not logged in'}</div>
         <Outlet />
       </Box>
     </Box>

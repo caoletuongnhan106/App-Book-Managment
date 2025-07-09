@@ -6,30 +6,26 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import Profile from './pages/Profile';
-import AdminLoans from './pages/AdminLoans';
-import UserLoans from './pages/UserLoans';
-import Dashboard from './pages/Dashboard';
-import ManageBooks from './pages/ManageBooks';
-import ManageUsers from './pages/ManageUsers';
+import AdminLoans from './pages/admin/AdminLoans';
+import UserLoans from './pages/user/UserLoans';
+import Dashboard from './pages/admin/Dashboard';
+import ManageBooks from './pages/admin/ManageBooks';
+import ManageUsers from './pages/admin/ManageUsers';
 import AdminLayout from './layouts/AdminLayout';
+import ResponsiveLayout from './layouts/ResponsiveLayout';
 
 const ProtectedRoute = () => {
-  const { user } = useAuth();
+  const { user, isAuthLoading } = useAuth();
+
+  if (isAuthLoading) return <div style={{ padding: 20 }}>Đang tải dữ liệu...</div>;
   if (!user) return <Navigate to="/login" replace />;
   return <Outlet />;
 };
 
-const RoleBasedRoute = ({
-  allowedRoles,
-  children,
-}: {
-  allowedRoles: string[];
-  children: ReactNode;
-}) => {
-  const { user } = useAuth();
-  if (!user || !allowedRoles.includes(user.role)) {
-    return <Navigate to="/login" replace />;
-  }
+const RoleBasedRoute = ({ allowedRoles, children }: { allowedRoles: string[]; children: ReactNode }) => {
+  const { user, isAuthLoading } = useAuth();
+  if (isAuthLoading) return <div style={{ padding: 20 }}>Đang tải dữ liệu...</div>;
+  if (!user || !allowedRoles.includes(user.role)) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
 
@@ -40,23 +36,28 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute />,
     children: [
-      { index: true, element: <Home /> },
-      { path: 'profile', element: <Profile /> },
       {
-        path: 'admin/loans',
-        element: (
-          <RoleBasedRoute allowedRoles={['admin']}>
-            <AdminLoans />
-          </RoleBasedRoute>
-        ),
-      },
-      {
-        path: 'user/loans',
-        element: (
-          <RoleBasedRoute allowedRoles={['user']}>
-            <UserLoans />
-          </RoleBasedRoute>
-        ),
+        element: <ResponsiveLayout />,
+        children: [
+          { index: true, element: <Home /> },
+          { path: 'profile', element: <Profile /> },
+          {
+            path: 'admin/loans',
+            element: (
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <AdminLoans />
+              </RoleBasedRoute>
+            ),
+          },
+          {
+            path: 'user/loans',
+            element: (
+              <RoleBasedRoute allowedRoles={["user"]}>
+                <UserLoans />
+              </RoleBasedRoute>
+            ),
+          },
+        ],
       },
     ],
   },
@@ -64,7 +65,7 @@ export const router = createBrowserRouter([
   {
     path: '/admin',
     element: (
-      <RoleBasedRoute allowedRoles={['admin']}>
+      <RoleBasedRoute allowedRoles={["admin"]}>
         <AdminLayout />
       </RoleBasedRoute>
     ),
@@ -78,3 +79,4 @@ export const router = createBrowserRouter([
 
   { path: '*', element: <NotFound /> },
 ]);
+
