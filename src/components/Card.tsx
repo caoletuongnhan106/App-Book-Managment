@@ -41,7 +41,6 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
     open(
       'Confirm Delete',
       <DeleteConfirmationContent bookId={book.id} bookTitle={book.title} onClose={close} />,
-      undefined
     );
   };
 

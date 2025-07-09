@@ -3,18 +3,21 @@ import {
   Typography,
   Button,
   Avatar,
-  TextField,
   Card,
   CardContent,
   Grid,
-  Alert,
+  TextField
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAvatarUpload } from '../hooks/useAvatarUpload';
 import { useProfileForm } from '../hooks/useProfileForm';
-import { useRef, useMemo, useCallback, useState } from 'react';
+import { useRef, useMemo, useCallback } from 'react';
 import { styled } from '@mui/material/styles';
+import { useSnackbar } from 'notistack';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 
 const StyledContainer = styled(Box)(({ theme }) => ({
   background: 'linear-gradient(135deg, #e0eafc, #cfdef3)',
@@ -25,7 +28,7 @@ const StyledContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const StyledOverlay = styled(Box)(({ theme }) => ({
+const StyledOverlay = styled(Box)(({ }) => ({
   position: 'absolute',
   top: 0,
   left: 0,
@@ -35,7 +38,7 @@ const StyledOverlay = styled(Box)(({ theme }) => ({
   zIndex: 0,
 }));
 
-const StyledAvatar = styled(Avatar)(({ theme }) => ({
+const StyledAvatar = styled(Avatar)(({ }) => ({
   width: 120,
   height: 120,
   transition: 'transform 0.3s ease-in-out',
@@ -45,7 +48,27 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   },
 }));
 
-const StyledButton = styled(Button)(({ theme }) => ({
+const StyledUploadButton = styled(Button)(({ theme }) => ({
+  borderRadius: '6px', 
+  padding: theme.spacing(1, 4),
+  textTransform: 'none',
+  fontWeight: 500, 
+  height: '32px', 
+  backgroundColor: '#1890ff', 
+  color: '#fff',
+  boxShadow: '0 2px 0 rgba(0, 0, 0, 0.02)', 
+  transition: 'all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)', 
+  '&:hover': {
+    backgroundColor: '#40a9ff',
+    boxShadow: '0 4px 6px rgba(24, 144, 255, 0.2)', 
+    transform: 'translateY(-1px)',
+  },
+  '&:active': {
+    transform: 'translateY(0)', 
+  },
+}));
+
+const StyledSaveButton = styled(Button)(({ theme }) => ({
   borderRadius: '20px',
   padding: theme.spacing(1, 3),
   textTransform: 'none',
@@ -58,7 +81,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const StyledCard = styled(Card)(({ theme }) => ({
+const StyledCard = styled(Card)(({ }) => ({
   mt: 4,
   borderRadius: '16px',
   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
@@ -67,7 +90,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
+const StyledTextField = styled(TextField)(({ }) => ({
   '& .MuiOutlinedInput-root': {
     borderRadius: '10px',
     '& fieldset': {
@@ -93,7 +116,7 @@ const Profile: React.FC = () => {
     setEmail,
     handleSave,
   } = useProfileForm(user);
-  const [message, setMessage] = useState<string | null>(null);
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleUploadClick = useMemo(() => () => {
     fileInputRef.current?.click();
@@ -110,14 +133,30 @@ const Profile: React.FC = () => {
   const handleBack = useMemo(() => () => navigate(-1), [navigate]);
 
   const enhancedHandleSave = async () => {
+    const isValid = handleSave();
+    if (!isValid) return;
+
     try {
-      await handleSave(); 
-      await updateUserProfile({ name, birthYear, email }); 
-      setMessage('Cập nhật thông tin thành công!');
-      setTimeout(() => setMessage(null), 3000); 
+      await updateUserProfile({ name, birthYear, email });
+      enqueueSnackbar('Cập nhật thông tin thành công!', {
+        variant: 'success',
+        autoHideDuration: 3000,
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+      });
     } catch (error) {
-      setMessage('Cập nhật thất bại, vui lòng thử lại.');
-      setTimeout(() => setMessage(null), 3000);
+      enqueueSnackbar('Cập nhật thất bại, vui lòng thử lại.', {
+        variant: 'error',
+        autoHideDuration: 3000,
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+      });
+    }
+  };
+
+  const handleDateChange = (newDate: Date | null) => {
+    if (newDate) {
+      setBirthYear(newDate.getFullYear().toString());
+    } else {
+      setBirthYear('');
     }
   };
 
@@ -141,53 +180,56 @@ const Profile: React.FC = () => {
           Thông tin cá nhân
         </Typography>
 
-        <Grid container spacing={3} alignItems="center" justifyContent="center">
-          <Grid size = {{ xs:12, md:4}} sx={{ textAlign: 'center' }}>
-            <StyledAvatar src={avatar || undefined} alt="Avatar" />
-            <StyledButton variant="contained" onClick={handleUploadClick} sx={{ mt: 2 }}>
-              Tải lên avatar
-            </StyledButton>
-            <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              accept="image/*"
-              onChange={handleAvatarChangeWithUpdate}
-            />
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Grid container spacing={3} alignItems="center" justifyContent="center">
+            <Grid size = {{xs:12, md:4}} sx={{ textAlign: 'center' }}>
+              <StyledAvatar src={avatar || undefined} alt="Avatar" />
+              <StyledUploadButton variant="contained" onClick={handleUploadClick} sx={{ mt: 2 }}>
+                Tải lên avatar
+              </StyledUploadButton>
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                accept="image/*"
+                onChange={handleAvatarChangeWithUpdate}
+              />
+            </Grid>
+            <Grid size = {{xs:12, md:6}}>
+              <StyledTextField
+                label="Họ tên"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                fullWidth
+                sx={{ mb: 2 }}
+              />
+              <DateTimePicker
+                label="Năm sinh"
+                value={birthYear ? new Date(parseInt(birthYear), 0, 1) : null}
+                onChange={handleDateChange}
+                views={['year']}
+                slotProps={{
+                  textField: {
+                    variant: 'outlined',
+                    fullWidth: true,
+                    sx: { mb: 2 },
+                  },
+                }}
+                maxDate={new Date()}
+              />
+              <StyledTextField
+                label="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                fullWidth
+                sx={{ mb: 2 }}
+              />
+              <StyledSaveButton variant="contained" color="primary" onClick={enhancedHandleSave} sx={{ mt: 2 }}>
+                Lưu thông tin
+              </StyledSaveButton>
+            </Grid>
           </Grid>
-          <Grid size = {{ xs:12, md:6}}>
-            <StyledTextField
-              label="Họ tên"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              fullWidth
-              sx={{ mb: 2 }}
-            />
-            <StyledTextField
-              label="Năm sinh"
-              type="number"
-              value={birthYear}
-              onChange={(e) => setBirthYear(e.target.value)}
-              fullWidth
-              sx={{ mb: 2 }}
-            />
-            <StyledTextField
-              label="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              fullWidth
-              sx={{ mb: 2 }}
-            />
-            <StyledButton variant="contained" color="primary" onClick={enhancedHandleSave} sx={{ mt: 2 }}>
-              Lưu thông tin
-            </StyledButton>
-            {message && (
-              <Alert severity={message.includes('thành công') ? 'success' : 'error'} sx={{ mt: 2 }}>
-                {message}
-              </Alert>
-            )}
-          </Grid>
-        </Grid>
+        </LocalizationProvider>
 
         <StyledCard>
           <CardContent>

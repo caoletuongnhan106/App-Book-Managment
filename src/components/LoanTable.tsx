@@ -29,7 +29,6 @@ const LoanTable: React.FC<LoanTableProps> = ({
   error,
   page,
   rowsPerPage,
-  total,
   onPageChange,
   onRowsPerPageChange,
 }) => {

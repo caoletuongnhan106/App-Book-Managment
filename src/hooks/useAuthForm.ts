@@ -1,21 +1,14 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import { useAuth } from '../context/AuthContext';
 import { useSnackbar } from './useSnackbar';
-import { RULE_ENUM } from '../context/AuthContext';
 import { useForm,type UseFormReturn } from 'react-hook-form';
 
 interface AuthFormData {
   email: string;
   password: string;
   confirmPassword?: string;
-}
-
-interface AuthResult {
-  success: boolean;
-  user?: { id: string; email: string; role: RULE_ENUM };
-  error?: string;
 }
 
 interface UseAuthFormReturn {
@@ -63,7 +56,6 @@ export const useAuthForm = (initialPath: string = '/login'): UseAuthFormReturn =
 
   const handleSubmit = useCallback(
     async (isRegister: boolean) => {
-      const schema = isRegister ? registerSchema : baseSchema;
       formMethods.formState.isSubmitted && formMethods.reset();
       formMethods.clearErrors();
       await formMethods.trigger();

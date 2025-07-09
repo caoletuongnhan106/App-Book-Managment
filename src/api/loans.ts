@@ -12,13 +12,6 @@ export interface Loan {
 
 let mockLoans: Loan[] = [];
 
-const getRandomLoanDate = () => {
-  const today = new Date();
-  const randomDays = Math.floor(Math.random() * 3) - 1;
-  today.setDate(today.getDate() + randomDays);
-  return today.toISOString().split('T')[0];
-};
-
 export const getLoansByUser = async (userId: number, isAdmin?: boolean): Promise<Loan[]> => {
   if (isAdmin) {
     return [...mockLoans];

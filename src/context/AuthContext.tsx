@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 export enum RULE_ENUM {
   ADMIN = 'admin',
@@ -26,6 +26,7 @@ interface AuthResult {
 
 interface AuthContextType {
   user: User | null;
+  isAuthLoading: boolean;
   login: (email: string, password: string) => Promise<AuthResult>;
   register: (email: string, password: string) => Promise<AuthResult>;
   logout: () => void;
@@ -57,12 +58,22 @@ const initialTestAccounts: TestAccount[] = [
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [testAccounts, setTestAccounts] = useState<TestAccount[]>(initialTestAccounts);
   const [user, setUser] = useState<User | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setIsAuthLoading(false);
+  }, []);
 
   const login = useCallback(async (email: string, password: string): Promise<AuthResult> => {
     const account = testAccounts.find((acc) => acc.email === email && acc.password === password);
     if (account) {
       const { password: _, ...safeUser } = account;
       setUser(safeUser);
+      localStorage.setItem('user', JSON.stringify(safeUser));
       return { success: true, user: safeUser };
     }
     return { success: false, error: 'Invalid email or password' };
@@ -86,22 +97,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { password: _, ...safeUser } = newAccount;
     setTestAccounts((prev) => [...prev, newAccount]);
     setUser(safeUser);
+    localStorage.setItem('user', JSON.stringify(safeUser));
 
     return { success: true, user: safeUser };
   }, [testAccounts]);
 
   const logout = useCallback(() => {
     setUser(null);
+    localStorage.removeItem('user');
   }, []);
 
   const updateAvatar = useCallback((newAvatar: string) => {
     if (!user) return;
 
     setUser((prev) => prev ? { ...prev, avatar: newAvatar } : null);
-
     setTestAccounts((prev) =>
       prev.map((acc) => (acc.id === user.id ? { ...acc, avatar: newAvatar } : acc))
     );
+    localStorage.setItem('user', JSON.stringify({ ...user, avatar: newAvatar }));
   }, [user]);
 
   const updateUserProfile = useCallback((updatedUser: Partial<User>) => {
@@ -111,15 +124,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(updated);
 
     setTestAccounts((prev) =>
-      prev.map((acc) =>
-        acc.id === user.id ? { ...acc, ...updatedUser } : acc
-      )
+      prev.map((acc) => (acc.id === user.id ? { ...acc, ...updatedUser } : acc))
     );
+    localStorage.setItem('user', JSON.stringify(updated));
   }, [user]);
 
   return (
     <AuthContext.Provider
-      value={{ user, login, register, logout, updateAvatar, updateUserProfile }}
+      value={{ user, isAuthLoading, login, register, logout, updateAvatar, updateUserProfile }}
     >
       {children}
     </AuthContext.Provider>
@@ -133,5 +145,3 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
-
-export { AuthContext };

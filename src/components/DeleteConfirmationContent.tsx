@@ -13,15 +13,15 @@ const DeleteConfirmationContent: React.FC<DeleteConfirmationContentProps> = ({ b
   const { deleteBook } = useBookContext();
 
   const mutation = useMutation({
-    mutationFn: (id: string) => deleteBookApi(id),
+    mutationFn: () => deleteBookApi(),
     onSuccess: () => {
-      deleteBook(bookId);
+      deleteBook(bookId); 
       onClose();
     },
   });
 
   const handleDelete = () => {
-    mutation.mutate(bookId);
+    mutation.mutate();
   };
 
   return (
