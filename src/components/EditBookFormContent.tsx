@@ -44,7 +44,7 @@ const EditBookFormContent: React.FC<EditBookFormContentProps> = ({ book, onClose
     },
   });
 
-  const onSubmit = (data: any, methods: any) => {
+  const onSubmit = (data: any) => {
     const imageFile = data.image as File | null;
     const imageUrl = imageFile ? URL.createObjectURL(imageFile) : book.imageUrl;
 

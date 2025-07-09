@@ -6,6 +6,7 @@ import {
   TextField,
   Grid,
   Stack,
+  Modal,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom'; 
 import { useAuth } from '../context/AuthContext';
@@ -26,7 +27,7 @@ const StyledContainer = styled(Box)(({ theme }) => ({
   overflow: 'hidden',
 }));
 
-const StyledOverlay = styled(Box)(({ theme }) => ({
+const StyledOverlay = styled(Box)(({  }) => ({
   position: 'absolute',
   top: 0,
   left: 0,
@@ -63,7 +64,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
+const StyledTextField = styled(TextField)(({  }) => ({
   '& .MuiOutlinedInput-root': {
     borderRadius: '15px',
     backgroundColor: '#eceff1',
@@ -91,6 +92,9 @@ const Home: React.FC = () => {
   const books = state.books || [];
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [openModal, setOpenModal] = useState(false);
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => setOpenModal(false);
 
   const filteredData = useMemo(() => {
     if (!searchTerm.trim()) return books;
@@ -133,6 +137,11 @@ const Home: React.FC = () => {
             Xin chào, {user?.email}
           </Typography>
           <Stack direction="row" spacing={2}>
+          {user?.role === 'admin' && (
+          <StyledButton variant="contained" onClick={() => navigate('/admin')}>
+            DashBoard
+          </StyledButton>
+          )}
             <StyledButton variant="contained" onClick={handleLoanPage}>
               {user?.role === 'admin' ? 'Quản lý mượn sách' : 'Mượn / Trả sách'}
             </StyledButton>
@@ -161,7 +170,32 @@ const Home: React.FC = () => {
           Library Management System
         </Typography>
 
-        {user?.role === 'admin' && <AddBookForm />}
+        {user?.role === 'admin' && (
+          <>
+            <Box sx={{ textAlign: 'right', mb: 3 }}>
+              <StyledButton variant="contained" onClick={handleOpenModal}>
+                + Add Book
+              </StyledButton>
+            </Box>
+            <Modal open={openModal} onClose={handleCloseModal}>
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: { xs: '90%', sm: 600 },
+                  bgcolor: 'background.paper',
+                  boxShadow: 24,
+                  p: 4,
+                  borderRadius: 2,
+                }}
+              >
+                <AddBookForm />
+              </Box>
+            </Modal>
+          </>
+        )}
 
         <StyledTextField
           label="Tìm kiếm sách (Tiêu đề, Tác giả, Thể loại)"
@@ -174,14 +208,14 @@ const Home: React.FC = () => {
 
         <Grid container spacing={3}>
           {filteredData.length === 0 ? (
-            <Grid size = {{xs:12}}>
+            <Grid size = {{xs:12}} >
               <Typography align="center" sx={{ color: '#78909c', fontStyle: 'italic' }}>
                 Không tìm thấy sách phù hợp.
               </Typography>
             </Grid>
           ) : (
             filteredData.map((book: Book) => (
-              <Grid size = {{xs:12, sm:6, md:4}} key={book.id} sx={{ animation: 'fadeIn 1s ease' }}>
+              <Grid size = {{ xs:12, sm:6, md:4}} key={book.id} sx={{ animation: 'fadeIn 1s ease' }}>
                 <StyledCardWrapper>
                   <CardComponent book={book} />
                 </StyledCardWrapper>

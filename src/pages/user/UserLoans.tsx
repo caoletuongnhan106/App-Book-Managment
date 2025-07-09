@@ -1,12 +1,12 @@
 import { Box, Typography, Button, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useLoanManagement } from '../hooks/useLoanManagement';
+import { useAuth } from '../../context/AuthContext';
+import { useLoanManagement } from '../../hooks/useLoanManagement';
 import { useEffect } from 'react';
-import LoanTable from '../components/LoanTable';
-import { useTable } from '../hooks/useTable';
-import { useSearchFilter } from '../hooks/useSearchFilter';
-import { getLoansByUser } from '../api/loans';
+import LoanTable from '../../components/LoanTable';
+import { useTable } from '../../hooks/useTable';
+import { useSearchFilter } from '../../hooks/useSearchFilter';
+import { getLoansByUser } from '../../api/loans';
 import { styled } from '@mui/material/styles';
 
 const StyledContainer = styled(Box)(({ theme }) => ({
@@ -20,7 +20,7 @@ const StyledContainer = styled(Box)(({ theme }) => ({
   overflow: 'hidden',
 }));
 
-const StyledOverlay = styled(Box)(({ theme }) => ({
+const StyledOverlay = styled(Box)(({  }) => ({
   position: 'absolute',
   top: 0,
   left: 0,
@@ -45,7 +45,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
+const StyledTextField = styled(TextField)(({  }) => ({
   '& .MuiOutlinedInput-root': {
     borderRadius: '10px',
     '& fieldset': {
