@@ -7,8 +7,9 @@ import {
   Grid,
   Stack,
   Modal,
+  Paper,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useBookContext } from '../context/BookContext';
 import AddBookForm from '../components/AddBookForm';
@@ -17,84 +18,56 @@ import CardComponent from '../components/Card';
 import type { Book } from '../types';
 
 const StyledContainer = styled(Box)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #eceff1 0%, #cfd8dc 100%)',
+  backgroundColor: '#f4f6f8',
   minHeight: '100vh',
   padding: theme.spacing(6),
   [theme.breakpoints.down('sm')]: {
     padding: theme.spacing(3),
   },
-  position: 'relative',
-  overflow: 'hidden',
 }));
 
-const StyledOverlay = styled(Box)(({  }) => ({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  width: '100%',
-  height: '100%',
-  background: 'rgba(236, 239, 241, 0.3)',
-  zIndex: 0,
-}));
-
-const StyledCardWrapper = styled(Box)(({ theme }) => ({
+const StyledHeader = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
-  borderRadius: '20px',
-  background: '#eceff1',
-  border: '1px solid #b0bec5',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
-    transform: 'translateY(-4px)',
-  },
+  marginBottom: theme.spacing(4),
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  background: '#ffffffcc',
+  borderRadius: theme.spacing(2),
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  borderRadius: '25px',
-  padding: theme.spacing(1.5, 4),
+  borderRadius: Number(theme.shape.borderRadius) * 2,
+  padding: theme.spacing(1, 3),
   textTransform: 'none',
   fontWeight: 'bold',
-  background: 'linear-gradient(90deg, #0288d1, #01579b)',
+  backgroundColor: theme.palette.primary.main,
   color: '#fff',
-  transition: 'all 0.3s ease',
   '&:hover': {
-    background: 'linear-gradient(90deg, #01579b, #003c8f)',
-    boxShadow: '0 6px 20px rgba(0, 60, 143, 0.4)',
-    transform: 'translateY(-3px)',
+    backgroundColor: theme.palette.primary.dark,
   },
 }));
 
-const StyledTextField = styled(TextField)(({  }) => ({
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  marginBottom: theme.spacing(4),
   '& .MuiOutlinedInput-root': {
-    borderRadius: '15px',
-    backgroundColor: '#eceff1',
-    '& fieldset': {
-      borderColor: '#4fc3f7',
-    },
-    '&:hover fieldset': {
-      borderColor: '#0288d1',
-      boxShadow: '0 0 8px rgba(2, 136, 209, 0.3)',
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: '#01579b',
-      boxShadow: '0 0 10px rgba(1, 87, 155, 0.4)',
-    },
-  },
-  '& .MuiInputLabel-root': {
-    color: '#0288d1',
+    borderRadius: Number(theme.shape.borderRadius) * 2,
+    backgroundColor: '#fff',
   },
 }));
 
 const Home: React.FC = () => {
-  const { user, logout } = useAuth(); 
+  const { user, logout } = useAuth();
   const { state } = useBookContext();
   const navigate = useNavigate();
   const books = state.books || [];
 
   const [searchTerm, setSearchTerm] = useState('');
   const [openModal, setOpenModal] = useState(false);
+
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => setOpenModal(false);
+  const handleCloseAdd = () => setOpenModal(false);
 
   const filteredData = useMemo(() => {
     if (!searchTerm.trim()) return books;
@@ -111,10 +84,7 @@ const Home: React.FC = () => {
     else if (user?.role === 'user') navigate('/user/loans');
   };
 
-  const handleProfile = () => {
-    navigate('/profile');
-  };
-
+  const handleProfile = () => navigate('/profile');
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -122,117 +92,79 @@ const Home: React.FC = () => {
 
   return (
     <StyledContainer>
-      <StyledOverlay />
-      <Box sx={{ position: 'relative', zIndex: 1 }}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{ mb: 4, p: 2, background: 'rgba(255, 255, 255, 0.3)', borderRadius: '15px' }}
-        >
-          <Typography
-            variant="h6"
-            sx={{ color: '#01579b', fontWeight: 600, textShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' }}
-          >
-            Xin chào, {user?.email}
-          </Typography>
-          <Stack direction="row" spacing={2}>
-          {user?.role === 'admin' && (
-          <StyledButton variant="contained" onClick={() => navigate('/admin')}>
-            DashBoard
-          </StyledButton>
-          )}
-            <StyledButton variant="contained" onClick={handleLoanPage}>
-              {user?.role === 'admin' ? 'Quản lý mượn sách' : 'Mượn / Trả sách'}
-            </StyledButton>
-            <StyledButton variant="contained" onClick={handleProfile}>
-              Trang cá nhân
-            </StyledButton>
-            <StyledButton variant="contained" onClick={handleLogout}>
-              Logout
-            </StyledButton>
-          </Stack>
-        </Stack>
-
-        <Typography
-          variant="h3"
-          align="center"
-          color="primary"
-          gutterBottom
-          sx={{
-            fontWeight: 700,
-            color: '#01579b',
-            mb: 5,
-            textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-            animation: 'fadeIn 1s ease',
-          }}
-        >
-          Library Management System
+      <StyledHeader elevation={3}>
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          Xin chào, {user?.email}
         </Typography>
-
-        {user?.role === 'admin' && (
-          <>
-            <Box sx={{ textAlign: 'right', mb: 3 }}>
-              <StyledButton variant="contained" onClick={handleOpenModal}>
-                + Add Book
-              </StyledButton>
-            </Box>
-            <Modal open={openModal} onClose={handleCloseModal}>
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: { xs: '90%', sm: 600 },
-                  bgcolor: 'background.paper',
-                  boxShadow: 24,
-                  p: 4,
-                  borderRadius: 2,
-                }}
-              >
-                <AddBookForm />
-              </Box>
-            </Modal>
-          </>
-        )}
-
-        <StyledTextField
-          label="Tìm kiếm sách (Tiêu đề, Tác giả, Thể loại)"
-          variant="outlined"
-          fullWidth
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ mb: 4 }}
-        />
-
-        <Grid container spacing={3}>
-          {filteredData.length === 0 ? (
-            <Grid size = {{xs:12}} >
-              <Typography align="center" sx={{ color: '#78909c', fontStyle: 'italic' }}>
-                Không tìm thấy sách phù hợp.
-              </Typography>
-            </Grid>
-          ) : (
-            filteredData.map((book: Book) => (
-              <Grid size = {{ xs:12, sm:6, md:4}} key={book.id} sx={{ animation: 'fadeIn 1s ease' }}>
-                <StyledCardWrapper>
-                  <CardComponent book={book} />
-                </StyledCardWrapper>
-              </Grid>
-            ))
+        <Stack direction="row" spacing={2}>
+          {user?.role === 'admin' && (
+            <StyledButton onClick={() => navigate('/admin')}>Dashboard</StyledButton>
           )}
-        </Grid>
-      </Box>
+          <StyledButton onClick={handleLoanPage}>
+            {user?.role === 'admin' ? 'Quản lý mượn sách' : 'Mượn / Trả sách'}
+          </StyledButton>
+          <StyledButton onClick={handleProfile}>Trang cá nhân</StyledButton>
+          <StyledButton onClick={handleLogout}>Logout</StyledButton>
+        </Stack>
+      </StyledHeader>
 
-      <style>
-        {`
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-        `}
-      </style>
+      <Typography
+        variant="h3"
+        align="center"
+        sx={{ fontWeight: 700, color: '#01579b', mb: 5 }}
+      >
+        Library Management System
+      </Typography>
+
+      {user?.role === 'admin' && (
+        <>
+          <Box sx={{ textAlign: 'right', mb: 3 }}>
+            <StyledButton onClick={handleOpenModal}>+ Add Book</StyledButton>
+          </Box>
+          <Modal open={openModal} onClose={handleCloseModal}>
+            <Box
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: { xs: '90%', sm: 600 },
+                bgcolor: 'background.paper',
+                boxShadow: 24,
+                p: 4,
+                borderRadius: 2,
+              }}
+            >
+              <AddBookForm onClose={handleCloseAdd} />
+            </Box>
+          </Modal>
+        </>
+      )}
+
+      <StyledTextField
+        label="Tìm kiếm sách (Tiêu đề, Tác giả, Thể loại)"
+        fullWidth
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      <Grid container spacing={3}>
+        {filteredData.length === 0 ? (
+          <Grid size ={{ xs:12}}>
+            <Typography align="center" sx={{ color: '#78909c', fontStyle: 'italic' }}>
+              Không tìm thấy sách phù hợp.
+            </Typography>
+          </Grid>
+        ) : (
+          filteredData.map((book: Book) => (
+            <Grid size = {{xs:12, sm:6, md:4}}  key={book.id}>
+              <Paper elevation={3} sx={{ p: 2, borderRadius: 3, height: '100%' }}>
+                <CardComponent book={book} />
+              </Paper>
+            </Grid>
+          ))
+        )}
+      </Grid>
     </StyledContainer>
   );
 };
