@@ -19,13 +19,7 @@ const UploadFile: React.FC<UploadFileProps> = ({ name, accept = 'image/*' }) => 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
     field.onChange(file);
-
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-    } else {
-      setPreviewUrl(null);
-    }
+    setPreviewUrl(file ? URL.createObjectURL(file) : null);
   };
 
   useEffect(() => {
@@ -35,7 +29,7 @@ const UploadFile: React.FC<UploadFileProps> = ({ name, accept = 'image/*' }) => 
   }, [previewUrl]);
 
   return (
-    <>
+    <Box>
       <Box
         onClick={handleClick}
         sx={{
@@ -49,6 +43,7 @@ const UploadFile: React.FC<UploadFileProps> = ({ name, accept = 'image/*' }) => 
             backgroundColor: '#f0f7ff',
             borderColor: '#1565c0',
           },
+          minHeight: 120,
         }}
       >
         <CloudUploadIcon sx={{ fontSize: 40, color: '#1976d2' }} />
@@ -63,12 +58,30 @@ const UploadFile: React.FC<UploadFileProps> = ({ name, accept = 'image/*' }) => 
       </Box>
 
       {previewUrl && (
-        <Box mt={2} textAlign="center">
-          <Typography variant="body2" sx={{ mb: 1 }}>Preview:</Typography>
+        <Box
+          mt={2}
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+            borderRadius: 2,
+            border: '1px solid #ccc',
+            maxWidth: '100%',
+            maxHeight: 200,
+            mx: 'auto',
+          }}
+        >
           <img
             src={previewUrl}
             alt="Preview"
-            style={{ maxHeight: 150, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '200px',
+              objectFit: 'contain',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            }}
           />
         </Box>
       )}
@@ -80,7 +93,7 @@ const UploadFile: React.FC<UploadFileProps> = ({ name, accept = 'image/*' }) => 
         onChange={handleChange}
         style={{ display: 'none' }}
       />
-    </>
+    </Box>
   );
 };
 

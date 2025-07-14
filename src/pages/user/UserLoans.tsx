@@ -10,7 +10,7 @@ import { getLoansByUser } from '../../api/loans';
 import { styled } from '@mui/material/styles';
 
 const StyledContainer = styled(Box)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #eceff1 0%, #cfd8dc 100%)',
+  background: 'linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%)',
   minHeight: '100vh',
   padding: theme.spacing(4),
   [theme.breakpoints.down('sm')]: {
@@ -20,7 +20,7 @@ const StyledContainer = styled(Box)(({ theme }) => ({
   overflow: 'hidden',
 }));
 
-const StyledOverlay = styled(Box)(({  }) => ({
+const StyledOverlay = styled(Box)(() => ({
   position: 'absolute',
   top: 0,
   left: 0,
@@ -31,28 +31,30 @@ const StyledOverlay = styled(Box)(({  }) => ({
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  borderRadius: '20px',
+  borderRadius: Number(theme.shape.borderRadius) * 2,
   padding: theme.spacing(1, 3),
   textTransform: 'none',
   fontWeight: 'bold',
-  backgroundColor: '#1976d2',
+  backgroundColor: theme.palette.primary.main,
   color: '#fff',
   transition: 'all 0.3s ease',
   '&:hover': {
-    backgroundColor: '#1565c0',
+    backgroundColor: theme.palette.primary.dark,
     transform: 'translateY(-2px)',
     boxShadow: '0 4px 12px rgba(21, 101, 192, 0.3)',
   },
 }));
 
-const StyledTextField = styled(TextField)(({  }) => ({
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  marginBottom: theme.spacing(3),
   '& .MuiOutlinedInput-root': {
-    borderRadius: '10px',
+    borderRadius: Number(theme.shape.borderRadius) * 2,
+    backgroundColor: '#fff',
     '& fieldset': {
-      borderColor: '#1976d2',
+      borderColor: theme.palette.primary.main,
     },
     '&:hover fieldset': {
-      borderColor: '#1565c0',
+      borderColor: theme.palette.primary.dark,
     },
   },
 }));
@@ -88,9 +90,9 @@ const UserLoans: React.FC = () => {
       label: 'Trạng thái',
       render: (_: any, row: any) =>
         row.returnDate ? (
-          <span style={{ color: 'gray' }}>Đã trả</span>
+          <Typography variant="body2" color="textSecondary">Đã trả</Typography>
         ) : (
-          <span style={{ color: 'green', fontWeight: 'bold' }}>Đang mượn</span>
+          <Typography variant="body2" color="success.main" fontWeight="bold">Đang mượn</Typography>
         ),
     },
     {
@@ -143,8 +145,10 @@ const UserLoans: React.FC = () => {
           variant="outlined"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ mb: 3, width: '100%', maxWidth: 400 }}
+          fullWidth
+          sx={{ maxWidth: 500, mx: 'auto' }}
         />
+
         <LoanTable
           {...tableProps}
           loans={table.data}
