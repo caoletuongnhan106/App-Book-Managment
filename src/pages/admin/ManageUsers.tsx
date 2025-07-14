@@ -13,10 +13,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddUserForm from '../../components/AddUserForm.tsx';
 import EditUserForm from '../../components/EditUserFormContent.tsx';
-import { useUserContext, type User } from '../../context/UserContext.tsx';
+import { useUserContext } from '../../context/UserContext.tsx';
+import type { UserInList } from '../../types';
 import { styled } from '@mui/material/styles';
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
+const StyledCard = styled(Paper)(({ theme }) => ({
   border: '1px solid #e0e0e0',
   borderRadius: theme.spacing(2),
   padding: theme.spacing(2),
@@ -25,6 +26,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   justifyContent: 'space-between',
   alignItems: 'center',
   transition: 'box-shadow 0.3s ease',
+  backgroundColor: '#fff',
   '&:hover': {
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
   },
@@ -34,9 +36,9 @@ const ManageUsers: React.FC = () => {
   const { users, deleteUser } = useUserContext();
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserInList | null>(null);
 
-  const handleEdit = (user: User) => {
+  const handleEdit = (user: UserInList) => {
     setSelectedUser(user);
     setEditOpen(true);
   };
@@ -48,31 +50,40 @@ const ManageUsers: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 4 } }}>
+    <Box sx={{ p: { xs: 2, sm: 4 }, backgroundColor: '#f5f7fb', minHeight: '100vh' }}>
       <Typography
         variant="h5"
-        sx={{ fontWeight: 'bold', color: '#1976d2', mb: 3 }}
+        fontWeight="bold"
+        textAlign="center"
+        color="primary"
+        mb={4}
       >
         Quản lý người dùng
       </Typography>
 
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => setAddOpen(true)}
-        sx={{ mb: 3, borderRadius: '10px', textTransform: 'none' }}
-      >
-        Thêm người dùng
-      </Button>
+      <Box display="flex" justifyContent="flex-end" mb={3}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setAddOpen(true)}
+          sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 'bold' }}
+        >
+          Thêm người dùng
+        </Button>
+      </Box>
 
       <Box>
         {users.length === 0 ? (
-          <Typography>Chưa có người dùng nào.</Typography>
+          <Typography textAlign="center" color="textSecondary">
+            Chưa có người dùng nào.
+          </Typography>
         ) : (
           users.map((user) => (
-            <StyledPaper key={user.id}>
+            <StyledCard key={user.id}>
               <Box>
-                <Typography fontWeight="bold">{user.name}</Typography>
+                <Typography fontWeight="bold" color="primary">
+                  {user.name}
+                </Typography>
                 <Typography variant="body2" color="textSecondary">
                   Email: {user.email}
                 </Typography>
@@ -85,7 +96,7 @@ const ManageUsers: React.FC = () => {
                   <DeleteIcon />
                 </IconButton>
               </Stack>
-            </StyledPaper>
+            </StyledCard>
           ))
         )}
       </Box>
@@ -113,7 +124,7 @@ const modalStyle = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   bgcolor: 'background.paper',
-  borderRadius: 2,
+  borderRadius: 3,
   boxShadow: 24,
   p: 4,
   width: { xs: '90%', sm: 500 },
