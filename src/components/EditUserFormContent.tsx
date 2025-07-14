@@ -4,13 +4,14 @@ import CustomTextField from './inputs/CustomTextField';
 import CustomRadioGroup from './inputs/CustomRadioGroup';
 import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
-import { useUserContext, type User } from '../context/UserContext';
+import { useUserContext } from '../context/UserContext';
 import { useMutation } from '@tanstack/react-query';
 import { editUserApi } from '../api/mockApi';
+import type { UserInList } from '../types'; // ✅ Dùng đúng type ở đây
 import * as yup from 'yup';
 
 interface Props {
-  user: User;
+  user: UserInList;
   onClose: () => void;
 }
 
@@ -43,9 +44,9 @@ const EditUserFormContent: React.FC<Props> = ({ user, onClose }) => {
   const { editUser } = useUserContext();
 
   const mutation = useMutation({
-    mutationFn: (updatedUser: User) => editUserApi(updatedUser),
+    mutationFn: (updatedUser: UserInList) => editUserApi(updatedUser),
     onSuccess: (data) => {
-      editUser( data);
+      editUser(data);
       onClose();
     },
   });
@@ -71,13 +72,13 @@ const EditUserFormContent: React.FC<Props> = ({ user, onClose }) => {
     >
       <Box sx={{ p: 2 }}>
         <Grid container spacing={2}>
-          <Grid size = {{xs:12, sm:6}} >
+          <Grid size = {{ xs:12, sm:6}}>
             <CustomTextField name="name" label="Name" />
           </Grid>
-          <Grid size = {{xs:12, sm:6}}>
+          <Grid size = {{ xs:12, sm:6}}>
             <CustomTextField name="email" label="Email" type="email" />
           </Grid>
-          <Grid size = {{xs:12}}>
+          <Grid size = {{ xs:12}}>
             <CustomRadioGroup name="role" options={roles} label="Role" />
           </Grid>
         </Grid>

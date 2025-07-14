@@ -1,38 +1,28 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from 'react';
 import { useUserContext } from './UserContext';
-
-export enum RULE_ENUM {
-  ADMIN = 'admin',
-  USER = 'user',
-}
-
-export interface User {
-  id: string;
-  email: string;
-  name?: string;
-  role: RULE_ENUM;
-  avatar?: string;
-  birthYear?: string;
-}
-
-interface TestAccount extends User {
-  password: string;
-}
+import type { AuthUser, TestAccount, UserInList } from '../types/index';
+import { RULE_ENUM } from '../types';
 
 interface AuthResult {
   success: boolean;
-  user?: User;
+  user?: AuthUser;
   error?: string;
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   isAuthLoading: boolean;
   login: (email: string, password: string) => Promise<AuthResult>;
   register: (email: string, password: string) => Promise<AuthResult>;
   logout: () => void;
   updateAvatar: (newAvatar: string) => void;
-  updateUserProfile: (updatedUser: Partial<User>) => void;
+  updateUserProfile: (updatedUser: Partial<AuthUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -58,7 +48,7 @@ const initialTestAccounts: TestAccount[] = [
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [testAccounts, setTestAccounts] = useState<TestAccount[]>(initialTestAccounts);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const { addUser } = useUserContext();
 
@@ -70,68 +60,90 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthLoading(false);
   }, []);
 
-  const login = useCallback(async (email: string, password: string): Promise<AuthResult> => {
-    const account = testAccounts.find((acc) => acc.email === email && acc.password === password);
-    if (account) {
-      const { password: _, ...safeUser } = account;
+  const login = useCallback(
+    async (email: string, password: string): Promise<AuthResult> => {
+      const account = testAccounts.find(
+        (acc) => acc.email === email && acc.password === password
+      );
+      if (account) {
+        const { password: _, ...safeUser } = account;
+        setUser(safeUser);
+        localStorage.setItem('user', JSON.stringify(safeUser));
+        return { success: true, user: safeUser };
+      }
+      return { success: false, error: 'Invalid email or password' };
+    },
+    [testAccounts]
+  );
+
+  const register = useCallback(
+    async (email: string, password: string): Promise<AuthResult> => {
+      const existingAccount = testAccounts.find((acc) => acc.email === email);
+      if (existingAccount) {
+        return { success: false, error: 'Email already exists' };
+      }
+
+      const newAccount: TestAccount = {
+        id: Date.now().toString(),
+        email,
+        password,
+        role: RULE_ENUM.USER,
+        name: '',
+        birthYear: '',
+      };
+
+      const { password: _, ...safeUser } = newAccount;
+      setTestAccounts((prev) => [...prev, newAccount]);
       setUser(safeUser);
       localStorage.setItem('user', JSON.stringify(safeUser));
-      return { success: true, user: safeUser };
-    }
-    return { success: false, error: 'Invalid email or password' };
-  }, [testAccounts]);
 
-  const register = useCallback(async (email: string, password: string): Promise<AuthResult> => {
-    const existingAccount = testAccounts.find((acc) => acc.email === email);
-    if (existingAccount) {
-      return { success: false, error: 'Email already exists' };
-    }
-  
-    const newAccount: TestAccount = {
-      id: Date.now().toString(),
-      email,
-      password,
-      role: RULE_ENUM.USER,
-      name: '',
-      birthYear: '',
-    };
-  
-    const { password: _, ...safeUser } = newAccount;
-    setTestAccounts((prev) => [...prev, newAccount]);
-    setUser(safeUser);
-    localStorage.setItem('user', JSON.stringify(safeUser));
-    addUser({ id: Number(newAccount.id), email, name: '' });
-  
-    return { success: true, user: safeUser };
-  }, [testAccounts, addUser]);
-  
+      const userForList: UserInList = {
+        id: Number(newAccount.id),
+        email,
+        name: '',
+        role: RULE_ENUM.USER,
+        birthYear: '',
+        avatar: '',
+      };
+      addUser(userForList);
+
+      return { success: true, user: safeUser };
+    },
+    [testAccounts, addUser]
+  );
 
   const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem('user');
   }, []);
 
-  const updateAvatar = useCallback((newAvatar: string) => {
-    if (!user) return;
+  const updateAvatar = useCallback(
+    (newAvatar: string) => {
+      if (!user) return;
 
-    setUser((prev) => prev ? { ...prev, avatar: newAvatar } : null);
-    setTestAccounts((prev) =>
-      prev.map((acc) => (acc.id === user.id ? { ...acc, avatar: newAvatar } : acc))
-    );
-    localStorage.setItem('user', JSON.stringify({ ...user, avatar: newAvatar }));
-  }, [user]);
+      setUser((prev) => (prev ? { ...prev, avatar: newAvatar } : null));
+      setTestAccounts((prev) =>
+        prev.map((acc) => (acc.id === user.id ? { ...acc, avatar: newAvatar } : acc))
+      );
+      localStorage.setItem('user', JSON.stringify({ ...user, avatar: newAvatar }));
+    },
+    [user]
+  );
 
-  const updateUserProfile = useCallback((updatedUser: Partial<User>) => {
-    if (!user) return;
+  const updateUserProfile = useCallback(
+    (updatedUser: Partial<AuthUser>) => {
+      if (!user) return;
 
-    const updated = { ...user, ...updatedUser };
-    setUser(updated);
+      const updated = { ...user, ...updatedUser };
+      setUser(updated);
 
-    setTestAccounts((prev) =>
-      prev.map((acc) => (acc.id === user.id ? { ...acc, ...updatedUser } : acc))
-    );
-    localStorage.setItem('user', JSON.stringify(updated));
-  }, [user]);
+      setTestAccounts((prev) =>
+        prev.map((acc) => (acc.id === user.id ? { ...acc, ...updatedUser } : acc))
+      );
+      localStorage.setItem('user', JSON.stringify(updated));
+    },
+    [user]
+  );
 
   return (
     <AuthContext.Provider

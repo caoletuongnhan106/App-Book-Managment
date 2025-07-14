@@ -2,8 +2,6 @@ import {
   Box,
   Typography,
   Grid,
-  Card,
-  CardContent,
   useTheme,
   Paper
 } from '@mui/material';
@@ -12,7 +10,6 @@ import {
 } from 'recharts';
 import { useBookContext } from '../../context/BookContext';
 import { useUserContext } from '../../context/UserContext';
-import { useAuth } from '../../context/AuthContext';
 import { useLoanManagement } from '../../hooks/useLoanManagement';
 import { useEffect } from 'react';
 
@@ -20,7 +17,6 @@ const Dashboard: React.FC = () => {
   const theme = useTheme();
   const { state: bookState } = useBookContext();
   const { users } = useUserContext();
-  const { user } = useAuth();
   const { loans, fetchLoans } = useLoanManagement({ isAdmin: true });
 
   useEffect(() => {
@@ -122,9 +118,9 @@ const Dashboard: React.FC = () => {
                   outerRadius={100}
                   label
                 >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
+                  {pieData.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
                 </Pie>
                 <Tooltip />
               </PieChart>
