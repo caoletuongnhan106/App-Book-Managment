@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { useUserContext } from './UserContext';
 
 export enum RULE_ENUM {
   ADMIN = 'admin',
@@ -59,6 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [testAccounts, setTestAccounts] = useState<TestAccount[]>(initialTestAccounts);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const { addUser } = useUserContext();
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -84,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (existingAccount) {
       return { success: false, error: 'Email already exists' };
     }
-
+  
     const newAccount: TestAccount = {
       id: Date.now().toString(),
       email,
@@ -93,14 +95,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       name: '',
       birthYear: '',
     };
-
+  
     const { password: _, ...safeUser } = newAccount;
     setTestAccounts((prev) => [...prev, newAccount]);
     setUser(safeUser);
     localStorage.setItem('user', JSON.stringify(safeUser));
-
+    addUser({ id: Number(newAccount.id), email, name: '' });
+  
     return { success: true, user: safeUser };
-  }, [testAccounts]);
+  }, [testAccounts, addUser]);
+  
 
   const logout = useCallback(() => {
     setUser(null);

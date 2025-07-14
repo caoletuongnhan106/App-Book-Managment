@@ -8,6 +8,7 @@ export interface Loan {
   bookTitle: string;
   loanDate: string;
   returnDate?: string;
+  returned: boolean;
 }
 
 let mockLoans: Loan[] = [];
@@ -33,6 +34,7 @@ export const borrowBook = async (
     userName,
     bookId,
     bookTitle,
+    returned: false,
     loanDate: new Date().toISOString().split('T')[0],
   };
   mockLoans.push(loan);
