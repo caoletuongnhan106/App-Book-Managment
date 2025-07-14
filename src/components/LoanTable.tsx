@@ -38,7 +38,7 @@ const LoanTable: React.FC<LoanTableProps> = ({
     { id: 'loanDate', label: 'Ngày mượn' },
     {  id: 'returnDate',
       label: 'Trạng thái',
-      render: (value: string | undefined, row: Loan) => (
+      render: (row: Loan) => (
         <Typography
           variant="body2"
           sx={{
