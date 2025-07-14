@@ -36,7 +36,19 @@ const LoanTable: React.FC<LoanTableProps> = ({
     { id: 'id', label: 'ID' },
     { id: 'bookTitle', label: 'Sách' },
     { id: 'loanDate', label: 'Ngày mượn' },
-    { id: 'returnDate', label: 'Ngày trả',  render: (value: string | undefined) => value || 'Chưa trả'},
+    {  id: 'returnDate',
+      label: 'Trạng thái',
+      render: (value: string | undefined, row: Loan) => (
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 'bold',
+            color: row.returnDate ? 'green' : 'red',
+          }}
+        >
+          {row.returnDate ? 'Đã trả' : 'Chưa trả'}
+        </Typography>
+      ),},
     {
       id: 'action',
       label: 'Hành động',

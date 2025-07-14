@@ -129,8 +129,6 @@ const AdminLayout: React.FC = () => {
           {drawer}
         </Drawer>
       )}
-
-      {/* Drawer for Mobile with Slide transition */}
       {isMobile && (
         <Slide direction="right" in={open} mountOnEnter unmountOnExit>
           <Drawer
@@ -150,7 +148,6 @@ const AdminLayout: React.FC = () => {
         </Slide>
       )}
 
-      {/* Main Content */}
       <Box
         component="main"
         sx={{
