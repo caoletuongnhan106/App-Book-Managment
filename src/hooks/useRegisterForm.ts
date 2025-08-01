@@ -27,16 +27,25 @@ export const useRegisterForm = (): UseRegisterFormReturn => {
   const registerSchema = useMemo(
     () =>
       yup.object({
-        email: yup.string().email('Invalid email format').required('Email is required'),
-        password: yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
+        email: yup
+          .string()
+          .email('Email không đúng định dạng')
+          .required('Email là bắt buộc')
+          .test('is-valid-domain', 'Tên miền email không hợp lệ', (value) => {
+            if (!value) return false;
+            const validDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com'];
+            const domain = value.split('@')[1];
+            return validDomains.includes(domain);
+          }),
+        password: yup.string().required('Mật khẩu là bắt buộc').min(6, 'Tối thiểu 6 ký tự'),
         confirmPassword: yup
           .string()
-          .oneOf([yup.ref('password')], 'Passwords must match')
-          .required('Confirm password is required'),
+          .oneOf([yup.ref('password')], 'Mật khẩu không khớp')
+          .required('Xác nhận mật khẩu là bắt buộc'),
       }),
     []
   );
-
+  
   const formMethods = useForm<RegisterFormData>({
     defaultValues: { email: '', password: '', confirmPassword: '' },
     resolver: yupResolver(registerSchema),

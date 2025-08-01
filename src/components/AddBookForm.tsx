@@ -1,11 +1,7 @@
+import { Box, Grid, Stack, Button, Typography } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  Box,
-  Grid,
-  Stack,
-  Button,
-  Typography,
-} from '@mui/material';
+import * as yup from 'yup';
+
 import { useBookContext } from '../context/BookContext';
 import CustomForm from './CustomForm';
 import CustomTextField from './inputs/CustomTextField';
@@ -13,23 +9,27 @@ import CustomAutocomplete from './inputs/CustomAutocomplete';
 import CustomCheckbox from './inputs/CustomCheckbox';
 import CustomRadioGroup from './inputs/CustomRadioGroup';
 import UploadFile from './inputs/UploadFile';
-import { useMutation } from '@tanstack/react-query';
-import { addBookApi } from '../api/mockApi';
-import * as yup from 'yup';
-
-interface AddBookFormProps {
-  onClose: () => void;
-}
 
 const schema = yup.object({
   title: yup.string().required('Title is required'),
   author: yup.string().required('Author is required'),
-  year: yup.number().required().min(0).typeError('Year must be a number'),
-  quantity: yup.number().required().min(0).typeError('Quantity must be a number'),
-  category: yup.string().required(),
+  year: yup
+    .number()
+    .required('Year is required')
+    .min(0, 'Year must be positive')
+    .typeError('Year must be a number'),
+  quantity: yup
+    .number()
+    .required('Quantity is required')
+    .min(0, 'Quantity must be positive')
+    .typeError('Quantity must be a number'),
+  category: yup.string().required('Category is required'),
   isAvailable: yup.boolean().required(),
   bookCondition: yup.string().required().oneOf(['new', 'used']),
-  image: yup.mixed().nullable(),
+  image: yup
+    .mixed()
+    .test('fileRequired', 'Image is required', (value) => value instanceof File),
+  description: yup.string().required('Description is required'),
 });
 
 const categories = ['Fiction', 'Non-Fiction', 'Science', 'History'];
@@ -38,34 +38,33 @@ const bookConditions = [
   { value: 'used', label: 'Used' },
 ];
 
+interface AddBookFormProps {
+  onClose: () => void;
+}
+
 const AddBookForm: React.FC<AddBookFormProps> = ({ onClose }) => {
   const { addBook } = useBookContext();
 
-  const mutation = useMutation({
-    mutationFn: (data: any) => addBookApi(data),
-    onSuccess: (data) => {
-      addBook(data);
-      onClose();
-    },
-  });
+  const onSubmit = async (data: any, methods: any) => {
+    const formData = new FormData();
+    formData.append('id', uuidv4());
+    formData.append('title', data.title);
+    formData.append('author', data.author);
+    formData.append('year', data.year.toString());
+    formData.append('quantity', data.quantity.toString());
+    formData.append('category', data.category);
+    formData.append('isAvailable', String(data.isAvailable));
+    formData.append('bookCondition', data.bookCondition);
+    formData.append('description', data.description); 
+    formData.append('createdAt', new Date().toISOString());
 
-  const onSubmit = (data: any, methods: any) => {
-    const imageFile = data.image as File | null;
-    const imageUrl = imageFile ? URL.createObjectURL(imageFile) : undefined;
+    if (data.image && data.image instanceof File) {
+      formData.append('image', data.image);
+    }
 
-    mutation.mutate({
-      id: uuidv4(),
-      title: data.title,
-      author: data.author,
-      year: Number(data.year),
-      quantity: Number(data.quantity),
-      category: data.category,
-      isAvailable: data.isAvailable,
-      bookCondition: data.bookCondition,
-      imageUrl,
-    });
-
+    addBook(formData);
     methods.reset();
+    onClose();
   };
 
   return (
@@ -85,6 +84,7 @@ const AddBookForm: React.FC<AddBookFormProps> = ({ onClose }) => {
           isAvailable: false,
           bookCondition: 'new',
           image: null,
+          description: '',
         }}
         validationSchema={schema}
       >
@@ -95,7 +95,7 @@ const AddBookForm: React.FC<AddBookFormProps> = ({ onClose }) => {
           <Grid size = {{xs:12, sm:6}}>
             <CustomTextField name="author" label="Author" />
           </Grid>
-          <Grid size = {{xs:6, sm:4}}>
+          <Grid size = {{xs:12, sm:4}}>
             <CustomTextField name="year" label="Year" type="number" />
           </Grid>
           <Grid size = {{xs:6, sm:4}}>
@@ -113,6 +113,10 @@ const AddBookForm: React.FC<AddBookFormProps> = ({ onClose }) => {
           <Grid size = {{xs:12}}>
             <UploadFile name="image" accept="image/*" />
           </Grid>
+          <Grid size = {{xs:12}}>
+            <CustomTextField name="description" label="Description" multiline minRows={3} fullWidth/>
+          </Grid>
+
         </Grid>
 
         <Stack direction="row" justifyContent="flex-end" spacing={2}>

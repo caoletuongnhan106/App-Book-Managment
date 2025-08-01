@@ -18,13 +18,28 @@ const UploadFile: React.FC<UploadFileProps> = ({ name, accept = 'image/*' }) => 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
+
+    // Revoke previous preview if any
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
     field.onChange(file);
-    setPreviewUrl(file ? URL.createObjectURL(file) : null);
+
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    } else {
+      setPreviewUrl(null);
+    }
   };
 
+  // Clean up on unmount
   useEffect(() => {
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
     };
   }, [previewUrl]);
 
@@ -50,7 +65,7 @@ const UploadFile: React.FC<UploadFileProps> = ({ name, accept = 'image/*' }) => 
         <Typography variant="body2" sx={{ mt: 1, color: '#1976d2' }}>
           Click to upload book cover
         </Typography>
-        {field.value && (
+        {field.value instanceof File && (
           <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
             {field.value.name}
           </Typography>

@@ -35,6 +35,7 @@ export const useTable = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+
   const fetchData = useCallback(async () => {
     if (!fetchApiFn || !userId) return;
     setLoading(true);

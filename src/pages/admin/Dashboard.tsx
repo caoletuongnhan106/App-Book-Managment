@@ -15,7 +15,7 @@ import { useEffect } from 'react';
 
 const Dashboard: React.FC = () => {
   const theme = useTheme();
-  const { state: bookState } = useBookContext();
+  const { books } = useBookContext();
   const { users } = useUserContext();
   const { loans, fetchLoans } = useLoanManagement({ isAdmin: true });
 
@@ -23,7 +23,7 @@ const Dashboard: React.FC = () => {
     fetchLoans();
   }, []);
 
-  const numBooks = bookState.books.length;
+  const numBooks = books.length;
   const numUsers = users.length;
   const numLoans = loans.length;
   const numReturned = loans.filter((l) => l.returnDate).length;
