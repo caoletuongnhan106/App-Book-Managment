@@ -1,6 +1,15 @@
 import {
-  Card, CardContent, CardMedia, Typography, CardActions,
-  Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  CardActions,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 import { useState } from 'react';
 import type { Book } from '../types';
@@ -11,6 +20,7 @@ import EditBookFormContent from './EditBookFormContent';
 import DeleteConfirmationContent from './DeleteConfirmationContent';
 import useCheckRole from '../hooks/useCheckRole';
 import { useLoanManagement } from '../hooks/useLoanManagement';
+import BookDetailDialog from './BookDetailDialog';
 
 interface CardProps {
   book: Book & { id: string };
@@ -19,15 +29,17 @@ interface CardProps {
 const CardComponent: React.FC<CardProps> = ({ book }) => {
   const isAdmin = useCheckRole('admin');
   const { open, close, dialogProps } = useDialog();
-  const { handleBorrow, handleReturn, loans, loading } = useLoanManagement();
+  const { handleBorrow, loans, loading } = useLoanManagement();
   const [openBorrowDialog, setOpenBorrowDialog] = useState(false);
   const [returnDate, setReturnDate] = useState('');
+  const [openDetailDialog, setOpenDetailDialog] = useState(false);
 
   const currentLoan = Array.isArray(loans)
     ? loans.find((l) => l.bookId === book.id && !l.returnDate)
     : null;
 
-  const handleOpenEditDialog = () => {
+  const handleOpenEditDialog = (e: React.MouseEvent) => {
+    e.stopPropagation();
     open(
       'Edit Book',
       <EditBookFormContent book={book} onClose={close} />,
@@ -37,14 +49,20 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
     );
   };
 
-  const handleOpenDeleteDialog = () => {
+  const handleOpenDeleteDialog = (e: React.MouseEvent) => {
+    e.stopPropagation();
     open(
       'Confirm Delete',
-      <DeleteConfirmationContent bookId={book.id} bookTitle={book.title} onClose={close} />,
+      <DeleteConfirmationContent
+        bookId={book.id}
+        bookTitle={book.title}
+        onClose={close}
+      />
     );
   };
 
-  const handleBorrowClick = () => {
+  const handleBorrowClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setOpenBorrowDialog(true);
   };
 
@@ -55,23 +73,37 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
     setReturnDate('');
   };
 
-  const handleReturnClick = async () => {
-    if (currentLoan?.id) {
-      await handleReturn(currentLoan.id);
-    }
+
+  const handleOpenDetailDialog = () => {
+    setOpenDetailDialog(true);
+  };
+
+  const handleCloseDetailDialog = () => {
+    setOpenDetailDialog(false);
   };
 
   return (
     <>
-      <Card sx={{ width: 300, m: 1 }}>
-        <CardMedia sx={{ height: 140 }} image={book.imageUrl || noImage} title={book.title} />
+      <Card
+        sx={{ width: 300, m: 1, cursor: 'pointer' }}
+        onClick={handleOpenDetailDialog}
+      >
+        <CardMedia
+          sx={{ height: 140 }}
+          image={book.imageUrl || noImage}
+          title={book.title}
+        />
         <CardContent>
-          <Typography gutterBottom variant="h5">{book.title}</Typography>
+          <Typography gutterBottom variant="h5">
+            {book.title}
+          </Typography>
           <Typography variant="body2">Author: {book.author}</Typography>
           <Typography variant="body2">Year: {book.year}</Typography>
           <Typography variant="body2">Quantity: {book.quantity}</Typography>
           <Typography variant="body2">Category: {book.category}</Typography>
-          <Typography variant="body2">Available: {book.isAvailable ? 'Yes' : 'No'}</Typography>
+          <Typography variant="body2">
+            Available: {book.isAvailable ? 'Yes' : 'No'}
+          </Typography>
           <Typography variant="body2">Condition: {book.bookCondition}</Typography>
         </CardContent>
         <CardActions>
@@ -88,16 +120,26 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
               <Button
                 size="small"
                 variant="outlined"
-                onClick={handleReturnClick}
-                disabled={!currentLoan || loading}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenDetailDialog();
+                }}
               >
-                TRẢ SÁCH
+                XEM CHI TIẾT
               </Button>
             </>
           ) : (
             <>
-              <Button size="small" onClick={handleOpenEditDialog}>Edit</Button>
-              <Button size="small" color="error" onClick={handleOpenDeleteDialog}>Delete</Button>
+              <Button size="small" onClick={handleOpenEditDialog}>
+                Edit
+              </Button>
+              <Button
+                size="small"
+                color="error"
+                onClick={handleOpenDeleteDialog}
+              >
+                Delete
+              </Button>
             </>
           )}
         </CardActions>
@@ -107,7 +149,10 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
         {dialogProps.content}
       </CustomDialog>
 
-      <Dialog open={openBorrowDialog} onClose={() => setOpenBorrowDialog(false)}>
+      <Dialog
+        open={openBorrowDialog}
+        onClose={() => setOpenBorrowDialog(false)}
+      >
         <DialogTitle>Xác nhận mượn sách</DialogTitle>
         <DialogContent>
           <Typography>Bạn có chắc muốn mượn sách "{book.title}"?</Typography>
@@ -123,9 +168,21 @@ const CardComponent: React.FC<CardProps> = ({ book }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenBorrowDialog(false)}>Hủy</Button>
-          <Button onClick={confirmBorrow} color="primary" disabled={!returnDate}>Xác nhận</Button>
+          <Button
+            onClick={confirmBorrow}
+            color="primary"
+            disabled={!returnDate}
+          >
+            Xác nhận
+          </Button>
         </DialogActions>
       </Dialog>
+
+      <BookDetailDialog
+        open={openDetailDialog}
+        onClose={handleCloseDetailDialog}
+        book={book}
+      />
     </>
   );
 };

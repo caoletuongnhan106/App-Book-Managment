@@ -15,6 +15,7 @@ import { useTable } from '../../hooks/useTable';
 import { getLoansByUser } from '../../api/loans';
 import type { Loan } from '../../api/loans';
 import LoanTable from '../../components/LoanTable';
+import dayjs from 'dayjs';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -27,7 +28,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   },
 }));
 
-const StyledTextField = styled(TextField)(({ }) => ({
+const StyledTextField = styled(TextField)(() => ({
   minWidth: 180,
   '& .MuiOutlinedInput-root': {
     borderRadius: 10,
@@ -35,7 +36,7 @@ const StyledTextField = styled(TextField)(({ }) => ({
 }));
 
 const AdminLoans: React.FC = () => {
-  const { loans, loading, error, fetchLoans } = useLoanManagement({ isAdmin: true });
+  const { loans, loading, error, fetchLoans, handleReturn } = useLoanManagement({ isAdmin: true });
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
@@ -94,6 +95,58 @@ const AdminLoans: React.FC = () => {
     await fetchLoans();
     await table.fetchData();
   };
+
+  const columns = [
+    { id: 'id', label: 'ID' },
+    { id: 'userName', label: 'Người mượn' },
+    { id: 'bookTitle', label: 'Tên sách' },
+    {
+      id: 'loanDate',
+      label: 'Ngày mượn',
+      render: (value: any) => dayjs(value).format('DD/MM/YYYY'),
+    },
+    {
+      id: 'returnDate',
+      label: 'Ngày trả',
+      render: (value: any) =>
+        value ? dayjs(value).format('DD/MM/YYYY') : (
+          <Typography color="text.secondary">Chưa trả</Typography>
+        ),
+    },
+    {
+      id: 'status',
+      label: 'Trạng thái',
+      render: (_: any, row?: Loan) => {
+        if (!row) return null;
+        const today = new Date();
+        const expectedReturn = new Date(row.expectedReturnDate);
+        const returnDate = row.returnDate ? new Date(row.returnDate) : null;
+
+        if (returnDate) {
+          return <Typography color="success.main" fontWeight="bold">Đã trả</Typography>;
+        } else if (today <= expectedReturn) {
+          return <Typography color="warning.main" fontWeight="bold">Đang mượn</Typography>;
+        } else {
+          return <Typography color="error.main" fontWeight="bold">Quá hạn</Typography>;
+        }
+      },
+    },
+    {
+      id: 'action',
+      label: 'Hành động',
+      render: (_: any, row?: Loan) =>
+        row && !row.returnDate && (
+          <Button
+            size="small"
+            variant="outlined"
+            color="primary"
+            onClick={() => handleReturn(row.id)}
+          >
+            Trả sách
+          </Button>
+        ),
+    },
+  ];
 
   return (
     <Box sx={{ bgcolor: '#f4f6f8', minHeight: '100vh', p: { xs: 2, sm: 4 } }}>
@@ -175,6 +228,10 @@ const AdminLoans: React.FC = () => {
           loans={table.data}
           loading={loading || table.loading}
           error={error || table.error}
+          total={table.total}
+          onReturn={handleReturn}
+          columns={columns}
+          isAdmin
         />
       </Box>
     </Box>

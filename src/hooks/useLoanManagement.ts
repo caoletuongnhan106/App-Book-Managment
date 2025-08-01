@@ -18,7 +18,7 @@ export const useLoanManagement = ({
   userIdOverride,
 }: UseLoanManagementProps = {}) => {
   const { user } = useAuth();
-  const { state: { books } } = useBookContext();
+  const { books} = useBookContext();
   const loggedInUserId = user?.id ? Number(user.id) : null;
   const userId = isAdmin ? userIdOverride ?? null : loggedInUserId;
   const userName = user?.email || `User ${userId}`; 

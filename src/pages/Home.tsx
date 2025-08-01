@@ -58,9 +58,8 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 
 const Home: React.FC = () => {
   const { user, logout } = useAuth();
-  const { state } = useBookContext();
+  const { books } = useBookContext();
   const navigate = useNavigate();
-  const books = state.books || [];
 
   const [searchTerm, setSearchTerm] = useState('');
   const [openModal, setOpenModal] = useState(false);

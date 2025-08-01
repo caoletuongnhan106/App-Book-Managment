@@ -21,6 +21,7 @@ interface CustomTableProps {
   data: any[];
   page?: number;
   rowsPerPage?: number;
+  totalCount?: number;
   onPageChange: (newPage: number) => void;
   onRowsPerPageChange: (newRowsPerPage: number) => void;
   loading?: boolean;
@@ -32,6 +33,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   page = 0,
   rowsPerPage = 5,
   onPageChange,
+  totalCount,
   onRowsPerPageChange,
   loading = false,
 }) => {
@@ -89,7 +91,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
       </TableContainer>
       <TablePagination
         component="div"
-        count={data.length}
+        count={totalCount ?? data.length}
         page={page}
         rowsPerPage={rowsPerPage}
         onPageChange={handleChangePage}
