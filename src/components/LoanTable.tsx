@@ -1,7 +1,8 @@
 import React from 'react';
 import CustomTable from './CustomTable';
 import type { Loan } from '../api/loans';
-import { Typography, Button } from '@mui/material';
+import { Typography } from '@mui/material';
+import dayjs from 'dayjs';
 
 interface Column {
   id: string;
@@ -12,7 +13,6 @@ interface Column {
 interface LoanTableProps {
   loans: Loan[];
   columns?: Column[];
-  onReturn?: (loanId: number) => Promise<void> | void;
   loading?: boolean;
   error?: string | null;
   page: number;
@@ -20,50 +20,57 @@ interface LoanTableProps {
   total: number;
   onPageChange: (newPage: number) => void;
   onRowsPerPageChange: (newRowsPerPage: number) => void;
+  isAdmin?: boolean;
+  onReturn?: (id: number) => void;
 }
 
 const LoanTable: React.FC<LoanTableProps> = ({
   loans,
-  onReturn,
   loading,
   error,
   page,
   rowsPerPage,
   onPageChange,
   onRowsPerPageChange,
+  total,
+  columns,
+  isAdmin,
 }) => {
-  const columns = [
+  const defaultColumns: Column[] = [
     { id: 'id', label: 'ID' },
     { id: 'bookTitle', label: 'Sách' },
     { id: 'loanDate', label: 'Ngày mượn' },
-    {  id: 'returnDate',
-      label: 'Trạng thái',
-      render: (row: Loan) => (
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 'bold',
-            color: row.returnDate ? 'green' : 'red',
-          }}
-        >
-          {row.returnDate ? 'Đã trả' : 'Chưa trả'}
-        </Typography>
-      ),},
     {
-      id: 'action',
-      label: 'Hành động',
-      render: (_: any, row: Loan) =>
-        row.returnDate ? null : (
-          <Button
-            size="small"
-            variant="outlined"
-            disabled={Boolean(row.returnDate) || loading}
-            onClick={() => onReturn?.(row.id)}
-          >
-            Trả sách
-          </Button>
-        ),
+      id: 'returnDate',
+      label: 'Ngày trả',
+      render: (value: any) =>
+        value ? value : <Typography color="text.secondary">Chưa trả</Typography>,
     },
+    {
+      id: 'status',
+      label: 'Trạng thái',
+      render: (_: any, row?: Loan) => {
+        if (!row) return null;
+    
+        const today = dayjs();
+        const expectedReturn = dayjs(row.expectedReturnDate);
+        const returnDate = row.returnDate ? dayjs(row.returnDate) : null;
+    
+        if (returnDate) {
+          return <Typography color="success.main" fontWeight="bold">Đã trả</Typography>;
+        }
+    
+        if (isAdmin) {
+          if (today.isAfter(expectedReturn)) {
+            return <Typography color="error.main" fontWeight="bold">Quá hạn</Typography>;
+          }
+          return <Typography color="warning.main" fontWeight="bold">Đang mượn</Typography>;
+        } else {
+          return <Typography color="warning.main" fontWeight="bold">Đang mượn</Typography>;
+        }
+      },
+    }
+    
   ];
 
   return (
@@ -72,13 +79,14 @@ const LoanTable: React.FC<LoanTableProps> = ({
       {error && <Typography color="error">{error}</Typography>}
       {!loading && !error && (
         <CustomTable
-          columns={columns}
+          columns={columns ?? defaultColumns}
           data={loans}
           page={page}
           rowsPerPage={rowsPerPage}
           onPageChange={onPageChange}
           onRowsPerPageChange={onRowsPerPageChange}
           loading={loading}
+          totalCount={total}
         />
       )}
     </>

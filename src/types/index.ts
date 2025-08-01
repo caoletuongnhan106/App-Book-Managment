@@ -8,6 +8,8 @@ export interface Book {
   isAvailable: boolean;
   bookCondition: 'new' | 'used';
   imageUrl?: string;
+  description?: string;
+  createdAt: string;
 }
 
 export enum RULE_ENUM {

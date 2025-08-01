@@ -6,8 +6,9 @@ import { useEffect } from 'react';
 import LoanTable from '../../components/LoanTable';
 import { useTable } from '../../hooks/useTable';
 import { useSearchFilter } from '../../hooks/useSearchFilter';
-import { getLoansByUser } from '../../api/loans';
+import { getLoansByUser, returnBook } from '../../api/loans';
 import { styled } from '@mui/material/styles';
+import dayjs from 'dayjs';
 
 const StyledContainer = styled(Box)(({ theme }) => ({
   background: 'linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%)',
@@ -63,7 +64,7 @@ const UserLoans: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.id ? Number(user.id) : 0;
-  const { loans, handleReturn, loading, fetchLoans } = useLoanManagement();
+  const { loans, fetchLoans, loading } = useLoanManagement();
   const userLoans = loans.filter((loan) => loan.userId === userId);
   const { searchTerm, setSearchTerm, filteredData } = useSearchFilter(userLoans, ['bookTitle']);
 
@@ -80,38 +81,63 @@ const UserLoans: React.FC = () => {
 
   const handleBack = () => navigate(-1);
 
+  const handleReturn = async (loanId: number) => {
+    try {
+      await returnBook(loanId);
+      await fetchLoans(); // ✅ Refresh lại sau khi trả
+    } catch (error) {
+      console.error('Lỗi trả sách:', error);
+    }
+  };
+
   const columns = [
     { id: 'id', label: 'ID' },
     { id: 'bookTitle', label: 'Tên sách' },
     { id: 'loanDate', label: 'Ngày mượn' },
-    { id: 'returnDate', label: 'Ngày trả' },
+    {
+      id: 'returnDate',
+      label: 'Ngày trả',
+      render: (value: any) =>
+        value ? (
+          dayjs(value).format('DD/MM/YYYY')
+        ) : (
+          <Typography color="text.secondary">Chưa trả</Typography>
+        ),
+    },
     {
       id: 'status',
       label: 'Trạng thái',
-      render: (_: any, row: any) =>
-        row.returnDate ? (
-          <Typography variant="body2" color="textSecondary">Đã trả</Typography>
-        ) : (
-          <Typography variant="body2" color="success.main" fontWeight="bold">Đang mượn</Typography>
-        ),
+      render: (_: any, row: any) => {
+        const today = dayjs();
+        const expectedReturn = dayjs(row.expectedReturnDate);
+        const returned = !!row.returnDate;
+
+        if (returned) {
+          return <Typography color="text.secondary">Đã trả</Typography>;
+        }
+
+        if (today.isAfter(expectedReturn)) {
+          return <Typography color="error.main" fontWeight="bold">Quá hạn</Typography>;
+        }
+
+        return <Typography color="warning.main" fontWeight="bold">Đang mượn</Typography>;
+      },
     },
-    {
-      id: 'action',
-      label: 'Hành động',
-      render: (_: any, row: any) =>
-        row.returnDate ? (
-          <Typography variant="body2" color="textSecondary">Đã trả</Typography>
-        ) : (
-          <StyledButton
-            variant="contained"
-            size="small"
-            onClick={() => handleReturn(row.id)}
-            disabled={loading}
-          >
-            Trả sách
-          </StyledButton>
-        ),
-    },
+    // {
+    //   id: 'action',
+    //   label: 'Hành động',
+    //   render: (_: any, row: any) =>
+    //     !row.returnDate && (
+    //       <Button
+    //         size="small"
+    //         variant="outlined"
+    //         color="primary"
+    //         onClick={() => handleReturn(row.id)}
+    //       >
+    //         Trả sách
+    //       </Button>
+    //     ),
+    // },
   ];
 
   const tableProps = {
@@ -127,7 +153,13 @@ const UserLoans: React.FC = () => {
         <StyledButton
           variant="outlined"
           onClick={handleBack}
-          sx={{ mb: 2, borderRadius: '20px', color: '#1976d2', borderColor: '#1976d2', '&:hover': { borderColor: '#1565c0' } }}
+          sx={{
+            mb: 2,
+            borderRadius: '20px',
+            color: '#1976d2',
+            borderColor: '#1976d2',
+            '&:hover': { borderColor: '#1565c0' },
+          }}
         >
           BACK
         </StyledButton>
@@ -154,6 +186,7 @@ const UserLoans: React.FC = () => {
           loans={table.data}
           columns={columns}
           loading={loading || table.loading}
+          total={table.total}
         />
       </Box>
     </StyledContainer>

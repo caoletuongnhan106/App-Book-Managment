@@ -15,15 +15,18 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddBookForm from '../../components/AddBookForm';
 import EditBookForm from '../../components/EditBookFormContent';
+import BookDetailDialog from '../../components/BookDetailDialog';
 import { useBookContext } from '../../context/BookContext';
 import type { Book } from '../../types';
 
 const ManageBooks: React.FC = () => {
   const theme = useTheme();
-  const { state, deleteBook } = useBookContext();
+  const { books, deleteBook } = useBookContext();
+
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [openDetailDialog, setOpenDetailDialog] = useState(false);
 
   const handleEdit = (book: Book) => {
     setSelectedBook(book);
@@ -32,6 +35,12 @@ const ManageBooks: React.FC = () => {
 
   const handleCloseAdd = () => setAddOpen(false);
   const handleCloseEdit = () => setEditOpen(false);
+  const handleCloseDetail = () => setOpenDetailDialog(false);
+
+  const handleCardClick = (book: Book) => {
+    setSelectedBook(book);
+    setOpenDetailDialog(true);
+  };
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: '#f4f6f8', minHeight: '100vh' }}>
@@ -70,7 +79,7 @@ const ManageBooks: React.FC = () => {
         gridTemplateColumns={{ xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }}
         gap={3}
       >
-        {state.books.length === 0 ? (
+        {books.length === 0 ? (
           <Typography
             variant="body1"
             color="text.secondary"
@@ -80,18 +89,20 @@ const ManageBooks: React.FC = () => {
             Chưa có sách nào trong thư viện.
           </Typography>
         ) : (
-          state.books.map((book) => (
+          books.map((book: Book) => (
             <Card
               key={book.id}
               elevation={3}
               sx={{
                 borderRadius: 3,
                 transition: 'all 0.3s ease',
+                cursor: 'pointer',
                 '&:hover': {
                   transform: 'translateY(-4px)',
                   boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
                 },
               }}
+              onClick={() => handleCardClick(book)}
             >
               <CardContent>
                 <Typography variant="h6" fontWeight={600} gutterBottom>
@@ -109,14 +120,20 @@ const ManageBooks: React.FC = () => {
               </CardContent>
               <CardActions sx={{ justifyContent: 'flex-end', pr: 2, pb: 2 }}>
                 <IconButton
-                  onClick={() => handleEdit(book)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEdit(book);
+                  }}
                   color="primary"
                   sx={{ transition: '0.2s', '&:hover': { color: '#1565c0' } }}
                 >
                   <EditIcon />
                 </IconButton>
                 <IconButton
-                  onClick={() => deleteBook(book.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteBook(book.id);
+                  }}
                   color="error"
                   sx={{ transition: '0.2s', '&:hover': { color: '#b71c1c' } }}
                 >
@@ -128,17 +145,30 @@ const ManageBooks: React.FC = () => {
         )}
       </Box>
 
+      {/* Modal Thêm Sách */}
       <Modal open={addOpen} onClose={handleCloseAdd}>
         <Box sx={modalStyle}>
           <AddBookForm onClose={handleCloseAdd} />
         </Box>
       </Modal>
 
+      {/* Modal Sửa Sách */}
       <Modal open={editOpen} onClose={handleCloseEdit}>
         <Box sx={modalStyle}>
-          {selectedBook && <EditBookForm book={selectedBook} onClose={handleCloseEdit} />}
+          {selectedBook && (
+            <EditBookForm book={selectedBook} onClose={handleCloseEdit} />
+          )}
         </Box>
       </Modal>
+
+      {/* Dialog Chi Tiết Sách */}
+      {selectedBook && (
+        <BookDetailDialog
+          open={openDetailDialog}
+          onClose={handleCloseDetail}
+          book={selectedBook}
+        />
+      )}
     </Box>
   );
 };

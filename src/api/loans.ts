@@ -9,6 +9,7 @@ export interface Loan {
   loanDate: string;
   returnDate?: string;
   returned: boolean;
+  expectedReturnDate: string;
 }
 
 let mockLoans: Loan[] = [];
@@ -28,6 +29,11 @@ export const borrowBook = async (
 ): Promise<Loan> => {
   const existingLoan = mockLoans.find((loan) => loan.bookId === bookId && !loan.returnDate);
   if (existingLoan) throw new Error('Sách đã được mượn');
+
+  const today = new Date();
+  const expectedReturn = new Date(today);
+  expectedReturn.setDate(today.getDate() + 7); 
+
   const loan: Loan = {
     id: Date.now(),
     userId,
@@ -35,11 +41,14 @@ export const borrowBook = async (
     bookId,
     bookTitle,
     returned: false,
-    loanDate: new Date().toISOString().split('T')[0],
+    loanDate: today.toISOString().split('T')[0],
+    expectedReturnDate: expectedReturn.toISOString().split('T')[0],
   };
+
   mockLoans.push(loan);
   return loan;
 };
+
 
 export const returnBook = async (loanId: number): Promise<void> => {
   const loanIndex = mockLoans.findIndex((loan) => loan.id === loanId);
