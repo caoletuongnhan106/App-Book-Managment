@@ -5,7 +5,7 @@ import { useBookContext } from '../context/BookContext';
 
 export const useAvailableBooks = (): Book[] => {
   const { books } = useBookContext(); 
-  const { loans } = useLoanManagement(); 
+  const { loans } = useLoanManagement()
 
   const [availableBooks, setAvailableBooks] = useState<Book[]>([]);
 
